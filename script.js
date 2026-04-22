@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 全局状态定义与本地缓存控制
+// 1. 全局状态定义
 // ==========================================
 let state = {
     lang: 'zh',
@@ -27,7 +27,82 @@ let state = {
 
 const LOCAL_STORAGE_KEY = 'cube_resume_state_v1_5';
 
-function saveStateToLocal() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state)); }
+// ==========================================
+// 🚀 核心新增：历史记录引擎 (撤销/重做)
+// ==========================================
+let historyStack = [];
+let historyIndex = -1;
+let isUndoRedoing = false;
+let historyDebounceTimer = null;
+
+function pushHistory() {
+    if (isUndoRedoing) return; // 如果正在撤销过程中，不记录
+    
+    // 如果在撤销后又进行了新操作，砍掉后面的未来历史
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    
+    // 深拷贝当前 state 并推入栈
+    historyStack.push(JSON.stringify(state));
+    
+    // 限制历史记录最多 50 步，防止撑爆内存
+    if (historyStack.length > 50) {
+        historyStack.shift();
+    } else {
+        historyIndex++;
+    }
+    updateHistoryButtons();
+}
+
+function debouncedPushHistory() {
+    clearTimeout(historyDebounceTimer);
+    historyDebounceTimer = setTimeout(pushHistory, 400); // 停止打字 400ms 后记录
+}
+
+function updateHistoryButtons() {
+    document.getElementById('btn-undo').disabled = historyIndex <= 0;
+    document.getElementById('btn-redo').disabled = historyIndex >= historyStack.length - 1;
+}
+
+function undo() {
+    if (historyIndex > 0) {
+        isUndoRedoing = true;
+        historyIndex--;
+        restoreState(historyStack[historyIndex]);
+        isUndoRedoing = false;
+        updateHistoryButtons();
+    }
+}
+
+function redo() {
+    if (historyIndex < historyStack.length - 1) {
+        isUndoRedoing = true;
+        historyIndex++;
+        restoreState(historyStack[historyIndex]);
+        isUndoRedoing = false;
+        updateHistoryButtons();
+    }
+}
+
+function restoreState(stateJSON) {
+    state = JSON.parse(stateJSON);
+    localStorage.setItem(LOCAL_STORAGE_KEY, stateJSON); // 强制存入本地，但不触发防抖
+    
+    applyCSSVariables();
+    els.paper.className = `resume-paper ${state.template}`;
+    
+    syncConfigUI(); // 撤销时，左侧控制面板的数值也要变回去
+    translateUI();
+    renderModuleList();
+    renderEditor();
+    renderPreview();
+}
+
+// 修改原有的本地存储函数，将其与历史记录引擎绑定
+function saveStateToLocal() { 
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state)); 
+    if(!isUndoRedoing) debouncedPushHistory();
+}
+
 function loadStateFromLocal() {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
@@ -41,6 +116,10 @@ function loadStateFromLocal() {
     }
 }
 
+
+// ==========================================
+// 词典与基础工具
+// ==========================================
 const i18n = {
     zh: {
         app_title: "魔方简历", app_badge: "青春版", export_pdf: "导出高清 PDF",
@@ -61,15 +140,78 @@ const els = {
 };
 
 function init() {
-    loadStateFromLocal(); bindTabEvents(); bindTemplateEvents(); bindLangEvent(); initConfigPanel(); initFontControls(); initSortable(); bindExportEvents(); bindSmartFitEvent();
+    loadStateFromLocal(); 
+    bindTabEvents(); 
+    bindTemplateEvents(); 
+    bindLangEvent(); 
+    initConfigPanel(); 
+    initFontControls(); 
+    initSortable(); 
+    bindExportEvents(); 
+    bindSmartFitEvent();
+    bindHistoryEvents(); // 绑定快捷键和按钮
+
     if(!state.activeModuleId || !state.modules.find(m => m.id === state.activeModuleId)) state.activeModuleId = state.modules[0].id; 
     els.paper.className = `resume-paper ${state.template}`;
-    translateUI(); renderModuleList(); renderEditor(); renderPreview();
+    
+    syncConfigUI();
+    translateUI(); 
+    renderModuleList(); 
+    renderEditor(); 
+    renderPreview();
+
+    // 网页加载完毕后，打底存入第一针历史记录
+    pushHistory();
 }
 
+function bindHistoryEvents() {
+    document.getElementById('btn-undo').addEventListener('click', undo);
+    document.getElementById('btn-redo').addEventListener('click', redo);
+
+    // 绑定键盘快捷键 Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) { // 兼容 Windows 和 Mac
+            if (e.key === 'z' || e.key === 'Z') {
+                e.preventDefault();
+                if (e.shiftKey) redo(); else undo();
+            } else if (e.key === 'y' || e.key === 'Y') {
+                e.preventDefault();
+                redo();
+            }
+        }
+    });
+}
+
+// 强制同步左侧面板UI数值 (用于撤销时)
+function syncConfigUI() {
+    els.bgColorPicker.value = state.config.bgColor;
+    
+    document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('active'));
+    const activeTpl = document.querySelector(`.tpl-card[data-tpl="${state.template}"]`);
+    if(activeTpl) activeTpl.classList.add('active');
+
+    const setVal = (id, val) => {
+        const slider = document.getElementById(`slider-${id}`);
+        const display = document.querySelector(`#stepper-${id} .num-display`);
+        if (slider) slider.value = val;
+        if (display) display.value = val;
+    };
+    setVal('line-height', state.config.lineHeight);
+    setVal('page-margin', state.config.pageMargin);
+    setVal('module-spacing', state.config.moduleSpacing);
+
+    ['name', 'title', 'sub', 'text'].forEach(level => {
+        document.getElementById(`sel-font-${level}`).value = state.config[`${level}Font`];
+        document.getElementById(`inp-size-${level}`).value = state.config[`${level}Size`];
+        const boldBtn = document.getElementById(`btn-bold-${level}`);
+        if (state.config[`${level}Bold`]) boldBtn.classList.add('active');
+        else boldBtn.classList.remove('active');
+    });
+}
+
+
 // ==========================================
-// 🚀 核心黑科技：智能推行引擎 (Auto-Spacer)
-// 保证所有元素乖乖在自己该在的页面，且边距完美
+// 智能推行引擎 (Auto-Spacer)
 // ==========================================
 function renderPreview() {
     let html = '';
@@ -86,7 +228,6 @@ function renderPreview() {
     });
     els.paper.innerHTML = html;
     
-    // 给浏览器一点点时间画出排版，然后我们去量它！
     setTimeout(applySmartPagination, 20); 
 }
 
@@ -94,24 +235,19 @@ function applySmartPagination() {
     const paper = els.paper;
     const a4PxHeight = document.getElementById('a4-measure').clientHeight;
 
-    // 清理可能遗留的保护线和推行量
     paper.querySelectorAll('.visual-page-gap').forEach(gap => gap.remove());
     const allItems = paper.querySelectorAll('.r-mod-title, .r-list-item, .r-text-content, .r-basic-info');
     allItems.forEach(item => item.style.marginTop = '0px');
 
-    // 拿到第一页的准确上边距，作为推到下一页的标准
     const topPadding = allItems.length > 0 ? allItems[0].offsetTop : 40;
 
-    // 开始从上到下逐个审查
     allItems.forEach(item => {
         const offsetTop = item.offsetTop;
         const offsetBottom = offsetTop + item.offsetHeight;
         
-        // 算出这个元素横跨了哪一页
         const pageStart = Math.floor(offsetTop / a4PxHeight);
         const pageEnd = Math.floor(offsetBottom / a4PxHeight);
 
-        // 防孤儿策略：如果是个大标题，且快要到底部了，直接推到下一页！
         if (item.classList.contains('r-mod-title')) {
             const distanceToBoundary = (pageStart + 1) * a4PxHeight - offsetTop;
             if (distanceToBoundary < 70) { 
@@ -120,23 +256,17 @@ function applySmartPagination() {
             }
         }
 
-        // 如果这个元素不幸被切割线压中了！
         if (pageEnd > pageStart && item.offsetHeight < a4PxHeight * 0.8) {
-            // 算出下一页完美起始点
             const targetTop = pageEnd * a4PxHeight + topPadding;
-            // 强行把它推下去！
             item.style.marginTop = `${targetTop - offsetTop}px`;
         }
     });
 
-    // 推行完毕后，纸变长了，重新算一共需要多少页
     const totalHeight = paper.scrollHeight;
     const totalPages = Math.ceil(totalHeight / a4PxHeight);
     
-    // 强制锁死纸张总高度，保证导出不出幺蛾子
     paper.style.height = `${totalPages * a4PxHeight}px`;
 
-    // 重新画上漂亮的视觉断层线
     for (let i = 1; i < totalPages; i++) {
         const gap = document.createElement('div');
         gap.className = 'visual-page-gap';
@@ -147,21 +277,20 @@ function applySmartPagination() {
 }
 
 // ==========================================
-// 配合新引擎的智能铺满算法
+// 交互与面板逻辑
 // ==========================================
 function bindSmartFitEvent() {
     els.btnSmartFit.addEventListener('click', () => {
         const paper = els.paper;
         const a4PxHeight = document.getElementById('a4-measure').clientHeight;
         
-        // 先脱下智能分页的衣服，测一测它真正的身材
         paper.querySelectorAll('.visual-page-gap').forEach(gap => gap.remove());
         paper.querySelectorAll('.r-mod-title, .r-list-item, .r-text-content, .r-basic-info').forEach(item => item.style.marginTop = '0px');
         paper.style.height = 'auto'; 
         
         let currentH = paper.scrollHeight;
         let pages = Math.max(1, Math.ceil(currentH / a4PxHeight));
-        let targetHeight = pages * a4PxHeight * 0.94; // 目标撑满本页的 94%
+        let targetHeight = pages * a4PxHeight * 0.94; 
         let loops = 0;
         
         if (currentH < targetHeight) {
@@ -175,7 +304,7 @@ function bindSmartFitEvent() {
                 applyCSSVariables(); loops++;
             }
         } else if (currentH > a4PxHeight * pages && currentH < a4PxHeight * (pages + 0.3)) {
-            targetHeight = (pages - 1) * a4PxHeight * 0.94; // 强行挤回上一页
+            targetHeight = (pages - 1) * a4PxHeight * 0.94; 
             while (paper.scrollHeight > targetHeight && loops < 25) {
                 let changed = false;
                 if(state.config.lineHeight > 1.2) { state.config.lineHeight -= 0.1; changed = true; }
@@ -187,17 +316,13 @@ function bindSmartFitEvent() {
             }
         }
         
-        document.getElementById('slider-line-height').value = state.config.lineHeight; document.querySelector('#stepper-line-height .num-display').value = state.config.lineHeight;
-        document.getElementById('slider-page-margin').value = state.config.pageMargin; document.querySelector('#stepper-page-margin .num-display').value = state.config.pageMargin;
-        document.getElementById('slider-module-spacing').value = state.config.moduleSpacing; document.querySelector('#stepper-module-spacing .num-display').value = state.config.moduleSpacing;
-        
+        syncConfigUI();
         saveStateToLocal();
-        // 穿回智能分页的衣服
+        pushHistory(); // 智能铺满是一个大动作，强制记录一次历史
         applySmartPagination();
     });
 }
 
-// 导出魔法：导出时藏起视觉断层，让切割刀斩在毫无文字的纯白地带！
 window.closeExportModal = function() { els.exportModal.classList.remove('active'); }
 function bindExportEvents() {
     els.btnPreExport.addEventListener('click', () => els.exportModal.classList.add('active'));
@@ -215,10 +340,10 @@ function bindExportEvents() {
     });
 }
 
-function bindLangEvent() { els.btnLang.addEventListener('click', () => { state.lang = state.lang === 'zh' ? 'en' : 'zh'; els.langText.textContent = state.lang === 'zh' ? 'EN' : '中'; translateUI(); renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal(); }); }
+function bindLangEvent() { els.btnLang.addEventListener('click', () => { state.lang = state.lang === 'zh' ? 'en' : 'zh'; els.langText.textContent = state.lang === 'zh' ? 'EN' : '中'; translateUI(); renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}); }
 function translateUI() { document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); }); }
 function bindTabEvents() { els.tabBtns.forEach(btn => { btn.addEventListener('click', () => { els.tabBtns.forEach(b => b.classList.remove('active')); els.tabContents.forEach(c => c.classList.remove('active')); btn.classList.add('active'); document.getElementById(btn.dataset.target).classList.add('active'); }); }); }
-function bindTemplateEvents() { els.tplCards.forEach(card => { card.addEventListener('click', () => { els.tplCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); state.template = card.getAttribute('data-tpl'); els.paper.className = `resume-paper ${state.template}`; renderPreview(); saveStateToLocal(); }); }); }
+function bindTemplateEvents() { els.tplCards.forEach(card => { card.addEventListener('click', () => { els.tplCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); state.template = card.getAttribute('data-tpl'); els.paper.className = `resume-paper ${state.template}`; renderPreview(); saveStateToLocal(); pushHistory();}); }); }
 
 function initConfigPanel() {
     els.bgColorPicker.value = state.config.bgColor; els.bgColorPicker.addEventListener('input', (e) => setBgColor(e.target.value));
@@ -235,7 +360,7 @@ function initFontControls() {
         const sel = document.getElementById(`sel-font-${level}`), decrease = document.getElementById(`btn-dec-${level}`), increase = document.getElementById(`btn-inc-${level}`), input = document.getElementById(`inp-size-${level}`), bold = document.getElementById(`btn-bold-${level}`);
         sel.value = state.config[`${level}Font`]; input.value = state.config[`${level}Size`]; if (state.config[`${level}Bold`]) bold.classList.add('active');
         const updateSize = (newVal) => { let val = parseInt(newVal); if(isNaN(val)) val = state.config[`${level}Size`]; if(val < 10) val = 10; if(val > 60) val = 60; state.config[`${level}Size`] = val; input.value = val; applyCSSVariables(); renderPreview(); saveStateToLocal(); };
-        sel.addEventListener('change', (e) => { state.config[`${level}Font`] = e.target.value; applyCSSVariables(); renderPreview(); saveStateToLocal(); }); decrease.addEventListener('click', () => updateSize(state.config[`${level}Size`] - 1)); increase.addEventListener('click', () => updateSize(state.config[`${level}Size`] + 1)); input.addEventListener('input', (e) => updateSize(e.target.value)); bold.addEventListener('click', () => { state.config[`${level}Bold`] = !state.config[`${level}Bold`]; bold.classList.toggle('active'); applyCSSVariables(); renderPreview(); saveStateToLocal(); });
+        sel.addEventListener('change', (e) => { state.config[`${level}Font`] = e.target.value; applyCSSVariables(); renderPreview(); saveStateToLocal(); }); decrease.addEventListener('click', () => updateSize(state.config[`${level}Size`] - 1)); increase.addEventListener('click', () => updateSize(state.config[`${level}Size`] + 1)); input.addEventListener('input', (e) => updateSize(e.target.value)); bold.addEventListener('click', () => { state.config[`${level}Bold`] = !state.config[`${level}Bold`]; bold.classList.toggle('active'); applyCSSVariables(); renderPreview(); saveStateToLocal(); pushHistory();});
     });
 }
 
@@ -244,7 +369,7 @@ function applyCSSVariables() {
     rootVars.setProperty('--r-bg-color', state.config.bgColor); rootVars.setProperty('--r-line-height', state.config.lineHeight); rootVars.setProperty('--r-page-margin', state.config.pageMargin + 'mm'); rootVars.setProperty('--r-module-spacing', state.config.moduleSpacing + 'px'); rootVars.setProperty('--r-name-font', state.config.nameFont); rootVars.setProperty('--r-name-size', state.config.nameSize + 'px'); rootVars.setProperty('--r-name-weight', state.config.nameBold ? 'bold' : 'normal'); rootVars.setProperty('--r-title-font', state.config.titleFont); rootVars.setProperty('--r-title-size', state.config.titleSize + 'px'); rootVars.setProperty('--r-title-weight', state.config.titleBold ? 'bold' : 'normal'); rootVars.setProperty('--r-sub-font', state.config.subFont); rootVars.setProperty('--r-sub-size', state.config.subSize + 'px'); rootVars.setProperty('--r-sub-weight', state.config.subBold ? 'bold' : 'normal'); rootVars.setProperty('--r-text-font', state.config.textFont); rootVars.setProperty('--r-text-size', state.config.textSize + 'px'); rootVars.setProperty('--r-text-weight', state.config.textBold ? 'bold' : 'normal');
 }
 
-function initSortable() { new Sortable(els.moduleList, { animation: 150, handle: '.mod-drag-handle', onEnd: function (evt) { const movedItem = state.modules.splice(evt.oldIndex, 1)[0]; state.modules.splice(evt.newIndex, 0, movedItem); renderPreview(); saveStateToLocal(); } }); }
+function initSortable() { new Sortable(els.moduleList, { animation: 150, handle: '.mod-drag-handle', onEnd: function (evt) { const movedItem = state.modules.splice(evt.oldIndex, 1)[0]; state.modules.splice(evt.newIndex, 0, movedItem); renderPreview(); saveStateToLocal(); pushHistory();} }); }
 function formatText(text) { if (!text) return ''; return /<[a-z][\s\S]*>/i.test(text) ? text : text.replace(/\n/g, '<br>'); }
 function getIndexedTitle(baseTitle, index) { if (state.lang === 'en') return `${baseTitle} ${index}`; const cnNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']; if (index <= 10) return `${baseTitle}${cnNums[index]}`; if (index < 20) return `${baseTitle}十${index % 10 === 0 ? '' : cnNums[index % 10]}`; return `${baseTitle}${cnNums[Math.floor(index / 10)]}十${index % 10 === 0 ? '' : cnNums[index % 10]}`; }
 
@@ -258,9 +383,9 @@ function renderModuleList() {
 }
 
 window.selectModule = function(id) { state.activeModuleId = id; renderModuleList(); renderEditor(); }
-window.toggleModuleVisibility = function(id, event) { event.stopPropagation(); const mod = state.modules.find(m => m.id === id); if(mod) { mod.visible = !mod.visible; renderModuleList(); renderPreview(); saveStateToLocal();} }
-window.addNewModule = function(type) { const newId = 'mod_' + generateId(); const newMod = { id: newId, type: type, visible: true, title: type === 'list' ? t('def_new_list') : t('def_new_text') }; if (type === 'list') newMod.items = [{ id: generateId(), title: t('def_title'), subtitle: t('def_sub'), date: t('def_date'), desc: t('def_desc') }]; else newMod.content = t('def_desc'); state.modules.push(newMod); state.activeModuleId = newId; renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal(); }
-window.deleteModule = function(id, event) { event.stopPropagation(); if (confirm(t('confirm_del_mod'))) { state.modules = state.modules.filter(m => m.id !== id); if (state.activeModuleId === id) state.activeModuleId = state.modules[0].id; renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal();} }
+window.toggleModuleVisibility = function(id, event) { event.stopPropagation(); const mod = state.modules.find(m => m.id === id); if(mod) { mod.visible = !mod.visible; renderModuleList(); renderPreview(); saveStateToLocal(); pushHistory();} }
+window.addNewModule = function(type) { const newId = 'mod_' + generateId(); const newMod = { id: newId, type: type, visible: true, title: type === 'list' ? t('def_new_list') : t('def_new_text') }; if (type === 'list') newMod.items = [{ id: generateId(), title: t('def_title'), subtitle: t('def_sub'), date: t('def_date'), desc: t('def_desc') }]; else newMod.content = t('def_desc'); state.modules.push(newMod); state.activeModuleId = newId; renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}
+window.deleteModule = function(id, event) { event.stopPropagation(); if (confirm(t('confirm_del_mod'))) { state.modules = state.modules.filter(m => m.id !== id); if (state.activeModuleId === id) state.activeModuleId = state.modules[0].id; renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();} }
 
 function renderEditor() {
     const mod = state.modules.find(m => m.id === state.activeModuleId);
@@ -282,9 +407,9 @@ window.updateModuleTitle = function(id, val) { state.modules.find(m => m.id === 
 window.updateBasicData = function(id, key, val) { state.modules.find(m => m.id === id).data[key] = val; renderPreview(); saveStateToLocal();}
 window.updateTextContent = function(id, val) { state.modules.find(m => m.id === id).content = val; renderPreview(); saveStateToLocal();}
 window.updateListItem = function(modId, itemId, key, val) { state.modules.find(m => m.id === modId).items.find(i => i.id === itemId)[key] = val; renderPreview(); saveStateToLocal();}
-window.uploadPhoto = function(modId, inputEl) { const file = inputEl.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { state.modules.find(m => m.id === modId).data.photo = e.target.result; renderEditor(); renderPreview(); saveStateToLocal();}; reader.readAsDataURL(file); } }
-window.removePhoto = function(modId) { state.modules.find(m => m.id === modId).data.photo = ''; renderEditor(); renderPreview(); saveStateToLocal();}
-window.addListItem = function(modId) { state.modules.find(m => m.id === modId).items.push({ id: generateId(), title: t('def_title'), subtitle: '', date: '', desc: '' }); renderEditor(); renderPreview(); saveStateToLocal();}
-window.deleteListItem = function(modId, itemId) { const mod = state.modules.find(m => m.id === modId); if (mod.items.length <= 1) { alert(t('alert_min')); return; } if(confirm(t('confirm_del'))) { mod.items = mod.items.filter(i => i.id !== itemId); renderEditor(); renderPreview(); saveStateToLocal();} }
+window.uploadPhoto = function(modId, inputEl) { const file = inputEl.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { state.modules.find(m => m.id === modId).data.photo = e.target.result; renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}; reader.readAsDataURL(file); } }
+window.removePhoto = function(modId) { state.modules.find(m => m.id === modId).data.photo = ''; renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}
+window.addListItem = function(modId) { state.modules.find(m => m.id === modId).items.push({ id: generateId(), title: t('def_title'), subtitle: '', date: '', desc: '' }); renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}
+window.deleteListItem = function(modId, itemId) { const mod = state.modules.find(m => m.id === modId); if (mod.items.length <= 1) { alert(t('alert_min')); return; } if(confirm(t('confirm_del'))) { mod.items = mod.items.filter(i => i.id !== itemId); renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();} }
 
 init();

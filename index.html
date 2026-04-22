@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛用型简历在线生成器 - 青春版 v1.3</title>
+    <title>泛用型简历在线生成器 - 青春版 v1.5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header class="top-nav">
-        <div class="logo">
-            <div class="logo-icon"><i class="fas fa-magic"></i></div>
-            <span data-i18n="app_title">魔方简历</span> <span class="badge" data-i18n="app_badge">青春版</span>
+        <div class="nav-left" style="display: flex; align-items: center; gap: 20px;">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-magic"></i></div>
+                <span data-i18n="app_title">魔方简历</span> <span class="badge" data-i18n="app_badge">青春版</span>
+            </div>
+            
+            <div class="history-actions" style="display: flex; gap: 8px; border-left: 1px solid #e5e7eb; padding-left: 20px;">
+                <button id="btn-undo" class="btn btn-outline" style="padding: 8px 14px;" title="撤销 (Ctrl+Z)" disabled><i class="fas fa-undo"></i></button>
+                <button id="btn-redo" class="btn btn-outline" style="padding: 8px 14px;" title="重做 (Ctrl+Y)" disabled><i class="fas fa-redo"></i></button>
+            </div>
         </div>
+
         <div class="actions">
             <button id="btn-toggle-lang" class="btn btn-outline" style="margin-right: 15px;">
                 <i class="fas fa-language"></i> <span id="lang-text">EN</span>

@@ -27,14 +27,16 @@ body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI"
 .logo-icon { background: var(--primary-color); color: white; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px;}
 .badge { background: #fef08a; color: #854d0e; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: bold; margin-left: 5px;}
 
+/* 🚀 增加了 disabled 样式 */
 .btn { padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; justify-content: center;}
-.btn:active { transform: scale(0.97); }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-primary { background: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
-.btn-primary:hover { background: var(--primary-hover); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4); transform: translateY(-1px); }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4); transform: translateY(-1px); }
 .btn-outline { background: white; border: 1px solid #d1d5db; color: var(--text-main); }
-.btn-outline:hover { background: #f9fafb; border-color: var(--primary-color); color: var(--primary-color); }
+.btn-outline:hover:not(:disabled) { background: #f9fafb; border-color: var(--primary-color); color: var(--primary-color); }
 .btn-danger { background: #fee2e2; color: #ef4444; padding: 8px 16px; border-radius: 8px;}
-.btn-danger:hover { background: #fecaca; }
+.btn-danger:hover:not(:disabled) { background: #fecaca; }
 
 .app-container { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
 .panel { background: var(--panel-bg); backdrop-filter: blur(16px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4); display: flex; flex-direction: column; overflow: hidden; }
@@ -113,7 +115,7 @@ textarea { height: 120px; resize: vertical; }
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 80px; font-size: 14px; }
 
 
-/* ================= 🚀 引擎重构：单一完美纸张 + 视觉断层 ================= */
+/* ================= 引擎重构：单一完美纸张 + 视觉断层 ================= */
 .resume-viewport {
     width: 100%;
     display: flex;
@@ -123,13 +125,11 @@ textarea { height: 120px; resize: vertical; }
 .resume-paper {
     background-color: var(--r-bg-color);
     width: 210mm;
-    min-height: 297mm; /* 保证至少一张 A4 的高度 */
-    
-    /* 核心恢复：页边距完全由底层 CSS 掌控，永远不跑偏 */
+    min-height: 297mm; 
     padding: var(--r-page-margin);
     box-sizing: border-box;
     
-    position: relative; /* 允许内部元素计算准确的 offsetTop */
+    position: relative; 
     box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
     border-radius: 6px; 
     margin-bottom: 40px;
@@ -141,41 +141,24 @@ textarea { height: 120px; resize: vertical; }
     transition: background-color 0.3s ease;
 }
 
-/* 视觉断层：假装这里断开了，满足分页的视觉诉求 */
 .visual-page-gap {
     position: absolute;
-    left: -5px; /* 故意溢出纸张一点点，更逼真 */
-    right: -5px;
+    left: -5px; right: -5px;
     height: 30px; 
-    background-color: #ebedee; /* 融入大背景 */
+    background-color: #ebedee;
     border-top: 1px solid #d1d5db;
     border-bottom: 1px solid #d1d5db;
-    transform: translateY(-50%); /* 完美对准 A4 切割线 */
+    transform: translateY(-50%); 
     z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
 }
 
-.gap-badge {
-    background: #d1d5db;
-    color: #4b5563;
-    font-size: 11px;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
-
-/* 导出专用魔法：导出时隐藏这个“假缝隙”，html2pdf 会直接切开我们安排好的纯白空白区！ */
-.resume-paper.export-mode .visual-page-gap {
-    display: none !important;
-}
-
+.gap-badge { background: #d1d5db; color: #4b5563; font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: bold; letter-spacing: 1px;}
+.resume-paper.export-mode .visual-page-gap { display: none !important; }
 
 /* --- 模块基础样式 --- */
-.r-module { margin-bottom: var(--r-module-spacing); transition: margin-top 0.3s ease;} /* 加了防割裂推行动画 */
+.r-module { margin-bottom: var(--r-module-spacing); transition: margin-top 0.3s ease;} 
 .r-mod-title { font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px; transition: margin-top 0.3s ease;}
 .r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); transition: margin-top 0.3s ease;}
 .r-basic-name { font-family: var(--r-name-font); font-size: var(--r-name-size); font-weight: var(--r-name-weight); color: #111827; margin-bottom: 8px; letter-spacing: 2px;}
@@ -183,7 +166,7 @@ textarea { height: 120px; resize: vertical; }
 .r-basic-photo-wrap { width: 90px; height: 120px; flex-shrink: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .r-basic-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
-.r-list-item { margin-bottom: 12px; transition: margin-top 0.3s ease;} /* 加了防割裂推行动画 */
+.r-list-item { margin-bottom: 12px; transition: margin-top 0.3s ease;} 
 .r-list-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
 .r-list-title { font-family: var(--r-sub-font); font-size: var(--r-sub-size); font-weight: var(--r-sub-weight); color: #1f2937; }
 .r-list-date { font-size: 0.9em; color: #4b5563; }
@@ -192,7 +175,6 @@ textarea { height: 120px; resize: vertical; }
 .r-list-desc ul, .r-text-content ul { padding-left: 20px; margin-top: 4px; }
 .r-list-desc li, .r-text-content li { margin-bottom: 2px; }
 
-/* 排版风格挂载点变更为 .resume-paper */
 .tpl-left .r-basic-info { text-align: left; }
 .tpl-left .r-basic-info.has-photo { display: flex; align-items: center; justify-content: space-between; }
 .tpl-left .r-basic-text { order: 1; flex: 1; }
@@ -219,12 +201,7 @@ textarea { height: 120px; resize: vertical; }
     opacity: 0; transition: opacity 0.3s ease;
 }
 .modal-overlay.active { display: flex; opacity: 1; }
-.modal-content {
-    background: white; width: 420px; border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-    transform: translateY(20px); transition: transform 0.3s ease;
-    overflow: hidden;
-}
+.modal-content { background: white; width: 420px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px); transition: transform 0.3s ease; overflow: hidden; }
 .modal-overlay.active .modal-content { transform: translateY(0); }
 .modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;}
 .modal-header h3 { font-size: 18px; color: #111827; margin: 0; }
