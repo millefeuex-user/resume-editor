@@ -21,13 +21,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--app-bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* 导航 */
+/* 导航与基础 UI (保持原样) */
 .top-nav { height: 64px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; flex-shrink: 0; box-shadow: 0 1px 0 rgba(0,0,0,0.05); z-index: 10; }
 .logo { font-size: 18px; font-weight: 800; color: #111827; display: flex; align-items: center; gap: 8px;}
 .logo-icon { background: var(--primary-color); color: white; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px;}
 .badge { background: #fef08a; color: #854d0e; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: bold; margin-left: 5px;}
 
-/* 按钮 */
 .btn { padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; justify-content: center;}
 .btn:active { transform: scale(0.97); }
 .btn-primary { background: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
@@ -37,7 +36,6 @@ body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI"
 .btn-danger { background: #fee2e2; color: #ef4444; padding: 8px 16px; border-radius: 8px;}
 .btn-danger:hover { background: #fecaca; }
 
-/* 主体布局 */
 .app-container { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
 .panel { background: var(--panel-bg); backdrop-filter: blur(16px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4); display: flex; flex-direction: column; overflow: hidden; }
 
@@ -46,18 +44,15 @@ body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI"
 .preview-container { flex: 1; background: transparent; border: none; box-shadow: none; padding: 0; }
 .preview-scroll-area { width: 100%; height: 100%; overflow-y: auto; padding: 0 20px 40px 20px; display: flex; justify-content: center; align-items: flex-start; }
 
-/* 选项卡 */
 .tabs { display: flex; padding: 10px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border-color); }
 .tab-btn { flex: 1; padding: 10px 0; background: transparent; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; color: var(--text-muted); transition: 0.3s;}
 .tab-btn.active { background: white; color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .tab-content { display: none; padding: 20px; overflow-y: auto; flex: 1; }
 .tab-content.active { display: block; }
-
 .control-group { margin-bottom: 22px; }
 .control-group label { display: block; font-size: 13px; color: #4b5563; margin-bottom: 10px; font-weight: 600; }
 .divider { height: 1px; background: var(--border-color); margin: 20px 0; }
 
-/* 排版风格选择器 UI */
 .template-selector { display: flex; gap: 10px; }
 .tpl-card { flex: 1; text-align: center; padding: 10px 5px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; background: white;}
 .tpl-card:hover { border-color: var(--primary-color); }
@@ -71,7 +66,6 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; bo
 .swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
 .swatch:hover { transform: scale(1.15); }
 
-/* 字体层级设置 */
 .font-settings-group { display: flex; flex-direction: column; gap: 10px; }
 .font-row { display: flex; align-items: center; gap: 8px; }
 .font-label { width: 55px; font-size: 12px; color: #4b5563; font-weight: 600; flex-shrink: 0;}
@@ -82,7 +76,6 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; bo
 .btn-bold:hover { background: #f3f4f6; color: var(--text-main); }
 .btn-bold.active { background: #eef2ff; color: var(--primary-color); border-color: var(--primary-color); }
 
-/* 步进器 */
 .stepper-slider-group { display: flex; flex-direction: row; align-items: center; gap: 15px; }
 .stepper-wrap { display: flex; align-items: center; justify-content: space-between; width: 105px; height: 32px; border: 1px solid #d1d5db; border-radius: 8px; background: white; overflow: hidden; transition: all 0.2s; flex-shrink: 0; }
 .stepper-wrap:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
@@ -98,7 +91,6 @@ input[type="text"], textarea { width: 100%; padding: 12px 14px; border: 1px soli
 input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary-color); background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 textarea { height: 120px; resize: vertical; }
 
-/* 模块列表 */
 .hint { font-size: 12px; color: #9ca3af; margin-bottom: 15px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;}
 .module-list { list-style: none; }
 .module-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border: 1px solid transparent; margin-bottom: 12px; border-radius: 14px; cursor: grab; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.2s;}
@@ -113,7 +105,6 @@ textarea { height: 120px; resize: vertical; }
 .mod-actions i:hover { color: var(--primary-color); transform: scale(1.1); }
 .mod-actions i.fa-trash:hover { color: #ef4444; }
 
-/* 编辑器区域 */
 #editor-header { padding: 20px 20px 15px 20px; margin: 0; font-size: 18px; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.5);}
 #dynamic-editor-area { padding: 20px; overflow-y: auto; flex: 1; }
 .list-item-editor { background: white; border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);}
@@ -122,36 +113,50 @@ textarea { height: 120px; resize: vertical; }
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 80px; font-size: 14px; }
 
 
-/* ================= 简历 A4 纸张排版引擎 ================= */
-.resume-paper {
-    background-color: var(--r-bg-color); 
+/* ================= 全新：仿真纸张与内容分离架构 ================= */
+.resume-viewport {
     width: 210mm;
-    min-height: 297mm;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
-    border-radius: 4px; 
-    box-sizing: border-box;
+    position: relative; /* 定位核心 */
+    margin-top: 0;
+}
+
+/* 底层：动态生成的断开纸张 */
+.resume-pages-bg {
+    width: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 1;
+}
+.a4-page-bg {
+    width: 100%;
+    height: 297mm; /* 严格 A4 物理高度 */
+    background-color: var(--r-bg-color);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+    border-radius: 6px; 
+    margin-bottom: 25px; /* 页面断层物理缝隙 */
+    transition: background-color 0.3s ease;
+}
+
+/* 表层：实际内容的容器（透明） */
+.resume-content-wrap {
+    position: relative;
+    z-index: 2; /* 浮于背景之上 */
+    width: 100%;
     padding: var(--r-page-margin);
+    box-sizing: border-box;
     line-height: var(--r-line-height);
     color: #1f2937;
-    transition: background-color 0.3s ease;
-    margin-top: 0; 
     font-family: var(--r-text-font);
     font-size: var(--r-text-size);
     font-weight: var(--r-text-weight);
+    /* 核心魔法：由于此层透明且连续，当内容溢出 297mm 时，文字会悬浮在断层缝隙（25px）的半空中，起到强烈的视觉警告作用 */
 }
 
 /* --- 公共模块样式 --- */
 .r-module { margin-bottom: var(--r-module-spacing); }
-
-.r-mod-title { 
-    font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; 
-    border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px;
-}
+.r-mod-title { font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px;}
 .r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); }
-.r-basic-name { 
-    font-family: var(--r-name-font); font-size: var(--r-name-size); font-weight: var(--r-name-weight); color: #111827; 
-    margin-bottom: 8px; letter-spacing: 2px;
-}
+.r-basic-name { font-family: var(--r-name-font); font-size: var(--r-name-size); font-weight: var(--r-name-weight); color: #111827; margin-bottom: 8px; letter-spacing: 2px;}
 .r-basic-details { font-size: 0.9em; color: #4b5563; }
 .r-basic-photo-wrap { width: 90px; height: 120px; flex-shrink: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .r-basic-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
@@ -165,24 +170,19 @@ textarea { height: 120px; resize: vertical; }
 .r-list-desc ul, .r-text-content ul { padding-left: 20px; margin-top: 4px; }
 .r-list-desc li, .r-text-content li { margin-bottom: 2px; }
 
-
-/* ================= 核心：个人信息的三种排版模式 ================= */
-
-/* 1. 左对齐 (tpl-left) : 照片在右，文字靠左 */
+/* 三大排版模式保留 */
 .tpl-left .r-basic-info { text-align: left; }
 .tpl-left .r-basic-info.has-photo { display: flex; align-items: center; justify-content: space-between; }
 .tpl-left .r-basic-text { order: 1; flex: 1; }
 .tpl-left .r-basic-photo-wrap { order: 2; margin-left: 20px; }
 .tpl-left .r-basic-details span { margin: 0 12px 0 0; display: inline-block; }
 
-/* 2. 居中对齐 (tpl-center) : 照片在上，文字居中在下 */
 .tpl-center .r-basic-info { text-align: center; }
 .tpl-center .r-basic-info.has-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .tpl-center .r-basic-text { order: 2; width: 100%; }
 .tpl-center .r-basic-photo-wrap { order: 1; margin: 0 0 15px 0; }
 .tpl-center .r-basic-details span { margin: 0 8px; display: inline-block; }
 
-/* 3. 右对齐 (tpl-right) : 照片在左，文字靠右 */
 .tpl-right .r-basic-info { text-align: right; }
 .tpl-right .r-basic-info.has-photo { display: flex; align-items: center; justify-content: space-between; }
 .tpl-right .r-basic-text { order: 2; flex: 1; }
@@ -190,12 +190,36 @@ textarea { height: 120px; resize: vertical; }
 .tpl-right .r-basic-details span { margin: 0 0 0 12px; display: inline-block; }
 
 
-/* 打印隔离 */
-@media print {
-    body, .app-container { height: auto; overflow: visible; background: #fff; padding: 0; }
-    .top-nav, .sidebar, .editor { display: none !important; }
-    .preview-container { padding: 0; background: transparent; display: block; overflow: visible; }
-    .preview-scroll-area { padding: 0; overflow: visible; display: block; }
-    .resume-paper { box-shadow: none; width: 100%; min-height: auto; margin: 0; border-radius: 0; }
-    .resume-paper { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+/* ================= 导出预览 Modal 样式 ================= */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
+.modal-content {
+    background: white; width: 420px; border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    transform: translateY(20px); transition: transform 0.3s ease;
+    overflow: hidden;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-header {
+    padding: 20px 24px; border-bottom: 1px solid #f3f4f6;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { font-size: 18px; color: #111827; margin: 0; }
+.btn-close { background: transparent; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; transition: 0.2s;}
+.btn-close:hover { color: #ef4444; transform: rotate(90deg); }
+.modal-body { padding: 24px; }
+.modal-warning {
+    background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 16px;
+    display: flex; gap: 12px; color: #b45309; font-size: 14px; line-height: 1.5;
+}
+.modal-warning i { font-size: 20px; color: #f59e0b; margin-top: 2px; }
+.modal-warning p { margin: 0; }
+.modal-footer {
+    padding: 16px 24px; background: #f9fafb; border-top: 1px solid #f3f4f6;
+    display: flex; justify-content: flex-end; gap: 12px;
 }

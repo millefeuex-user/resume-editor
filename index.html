@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛用型简历在线生成器 - 青春版</title>
+    <title>泛用型简历在线生成器 - 青春版 v1.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -17,7 +17,7 @@
             <button id="btn-toggle-lang" class="btn btn-outline" style="margin-right: 15px;">
                 <i class="fas fa-language"></i> <span id="lang-text">EN</span>
             </button>
-            <button id="btn-export-pdf" class="btn btn-primary"><i class="fas fa-download"></i> <span data-i18n="export_pdf">导出高清 PDF</span></button>
+            <button id="btn-pre-export" class="btn btn-primary"><i class="fas fa-download"></i> <span data-i18n="export_pdf">导出高清 PDF</span></button>
         </div>
     </header>
 
@@ -29,6 +29,10 @@
             </div>
 
             <div id="tab-layout" class="tab-content active">
+                <button class="btn btn-primary" id="btn-smart-fit" style="width: 100%; margin-bottom: 20px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
+                    <i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="smart_fit">智能一键铺满纸张</span>
+                </button>
+
                 <div class="control-group">
                     <label data-i18n="tpl_select">排版风格</label>
                     <div class="template-selector">
@@ -181,8 +185,31 @@
 
         <div class="panel preview-container">
             <div class="preview-scroll-area">
-                <div id="resume-preview" class="resume-paper tpl-left">
-                    </div>
+                <div id="resume-viewport" class="resume-viewport tpl-left">
+                    <div id="resume-pages-bg" class="resume-pages-bg"></div>
+                    <div id="resume-content-wrap" class="resume-content-wrap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="a4-measure" style="width: 210mm; height: 297mm; position: absolute; visibility: hidden; z-index: -999;"></div>
+
+    <div id="export-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="modal_export_title">PDF 导出确认</h3>
+                <button class="btn-close" onclick="closeExportModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p data-i18n="modal_warning_text">请检查右侧预览区：确保没有文字刚好卡在两页断开的缝隙处。如果有，请在排版设置中微调参数，或使用“智能铺满”。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeExportModal()" data-i18n="btn_cancel">取消微调</button>
+                <button class="btn btn-primary" id="btn-export-pdf"><i class="fas fa-file-pdf"></i> <span data-i18n="btn_confirm_export">确认导出</span></button>
             </div>
         </div>
     </div>
