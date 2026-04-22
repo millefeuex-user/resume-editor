@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛用型简历在线生成器 - 青春版 v1.1</title>
+    <title>泛用型简历在线生成器 - 青春版 v1.3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -185,9 +185,9 @@
 
         <div class="panel preview-container">
             <div class="preview-scroll-area">
-                <div id="resume-viewport" class="resume-viewport tpl-left">
-                    <div id="resume-pages-bg" class="resume-pages-bg"></div>
-                    <div id="resume-content-wrap" class="resume-content-wrap"></div>
+                <div class="resume-viewport">
+                    <div id="resume-paper" class="resume-paper tpl-left">
+                        </div>
                 </div>
             </div>
         </div>
@@ -203,12 +203,12 @@
             </div>
             <div class="modal-body">
                 <div class="modal-warning">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <p data-i18n="modal_warning_text">请检查右侧预览区：确保没有文字刚好卡在两页断开的缝隙处。如果有，请在排版设置中微调参数，或使用“智能铺满”。</p>
+                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                    <p data-i18n="modal_warning_text" style="color: #065f46;">已开启智能防割裂引擎，文字已被安全推至次页。如果感觉留白太多，请点击左侧“智能铺满”。</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeExportModal()" data-i18n="btn_cancel">取消微调</button>
+                <button class="btn btn-outline" onclick="closeExportModal()" data-i18n="btn_cancel">再调调</button>
                 <button class="btn btn-primary" id="btn-export-pdf"><i class="fas fa-file-pdf"></i> <span data-i18n="btn_confirm_export">确认导出</span></button>
             </div>
         </div>

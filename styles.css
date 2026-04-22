@@ -21,7 +21,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--app-bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* 导航与基础 UI (保持原样) */
+/* 导航与 UI 面板 */
 .top-nav { height: 64px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; flex-shrink: 0; box-shadow: 0 1px 0 rgba(0,0,0,0.05); z-index: 10; }
 .logo { font-size: 18px; font-weight: 800; color: #111827; display: flex; align-items: center; gap: 8px;}
 .logo-icon { background: var(--primary-color); color: white; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px;}
@@ -113,55 +113,77 @@ textarea { height: 120px; resize: vertical; }
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 80px; font-size: 14px; }
 
 
-/* ================= 全新：仿真纸张与内容分离架构 ================= */
+/* ================= 🚀 引擎重构：单一完美纸张 + 视觉断层 ================= */
 .resume-viewport {
-    width: 210mm;
-    position: relative; /* 定位核心 */
-    margin-top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
-/* 底层：动态生成的断开纸张 */
-.resume-pages-bg {
-    width: 100%;
-    position: absolute;
-    top: 0; left: 0;
-    z-index: 1;
-}
-.a4-page-bg {
-    width: 100%;
-    height: 297mm; /* 严格 A4 物理高度 */
+.resume-paper {
     background-color: var(--r-bg-color);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
-    border-radius: 6px; 
-    margin-bottom: 25px; /* 页面断层物理缝隙 */
-    transition: background-color 0.3s ease;
-}
-
-/* 表层：实际内容的容器（透明） */
-.resume-content-wrap {
-    position: relative;
-    z-index: 2; /* 浮于背景之上 */
-    width: 100%;
+    width: 210mm;
+    min-height: 297mm; /* 保证至少一张 A4 的高度 */
+    
+    /* 核心恢复：页边距完全由底层 CSS 掌控，永远不跑偏 */
     padding: var(--r-page-margin);
     box-sizing: border-box;
+    
+    position: relative; /* 允许内部元素计算准确的 offsetTop */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+    border-radius: 6px; 
+    margin-bottom: 40px;
     line-height: var(--r-line-height);
     color: #1f2937;
     font-family: var(--r-text-font);
     font-size: var(--r-text-size);
     font-weight: var(--r-text-weight);
-    /* 核心魔法：由于此层透明且连续，当内容溢出 297mm 时，文字会悬浮在断层缝隙（25px）的半空中，起到强烈的视觉警告作用 */
+    transition: background-color 0.3s ease;
 }
 
-/* --- 公共模块样式 --- */
-.r-module { margin-bottom: var(--r-module-spacing); }
-.r-mod-title { font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px;}
-.r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); }
+/* 视觉断层：假装这里断开了，满足分页的视觉诉求 */
+.visual-page-gap {
+    position: absolute;
+    left: -5px; /* 故意溢出纸张一点点，更逼真 */
+    right: -5px;
+    height: 30px; 
+    background-color: #ebedee; /* 融入大背景 */
+    border-top: 1px solid #d1d5db;
+    border-bottom: 1px solid #d1d5db;
+    transform: translateY(-50%); /* 完美对准 A4 切割线 */
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.gap-badge {
+    background: #d1d5db;
+    color: #4b5563;
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* 导出专用魔法：导出时隐藏这个“假缝隙”，html2pdf 会直接切开我们安排好的纯白空白区！ */
+.resume-paper.export-mode .visual-page-gap {
+    display: none !important;
+}
+
+
+/* --- 模块基础样式 --- */
+.r-module { margin-bottom: var(--r-module-spacing); transition: margin-top 0.3s ease;} /* 加了防割裂推行动画 */
+.r-mod-title { font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px; transition: margin-top 0.3s ease;}
+.r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); transition: margin-top 0.3s ease;}
 .r-basic-name { font-family: var(--r-name-font); font-size: var(--r-name-size); font-weight: var(--r-name-weight); color: #111827; margin-bottom: 8px; letter-spacing: 2px;}
 .r-basic-details { font-size: 0.9em; color: #4b5563; }
 .r-basic-photo-wrap { width: 90px; height: 120px; flex-shrink: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .r-basic-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
-.r-list-item { margin-bottom: 12px; }
+.r-list-item { margin-bottom: 12px; transition: margin-top 0.3s ease;} /* 加了防割裂推行动画 */
 .r-list-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
 .r-list-title { font-family: var(--r-sub-font); font-size: var(--r-sub-size); font-weight: var(--r-sub-weight); color: #1f2937; }
 .r-list-date { font-size: 0.9em; color: #4b5563; }
@@ -170,7 +192,7 @@ textarea { height: 120px; resize: vertical; }
 .r-list-desc ul, .r-text-content ul { padding-left: 20px; margin-top: 4px; }
 .r-list-desc li, .r-text-content li { margin-bottom: 2px; }
 
-/* 三大排版模式保留 */
+/* 排版风格挂载点变更为 .resume-paper */
 .tpl-left .r-basic-info { text-align: left; }
 .tpl-left .r-basic-info.has-photo { display: flex; align-items: center; justify-content: space-between; }
 .tpl-left .r-basic-text { order: 1; flex: 1; }
@@ -189,8 +211,7 @@ textarea { height: 120px; resize: vertical; }
 .tpl-right .r-basic-photo-wrap { order: 1; margin-right: 20px; }
 .tpl-right .r-basic-details span { margin: 0 0 0 12px; display: inline-block; }
 
-
-/* ================= 导出预览 Modal 样式 ================= */
+/* Modal 弹窗样式 */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
@@ -205,21 +226,12 @@ textarea { height: 120px; resize: vertical; }
     overflow: hidden;
 }
 .modal-overlay.active .modal-content { transform: translateY(0); }
-.modal-header {
-    padding: 20px 24px; border-bottom: 1px solid #f3f4f6;
-    display: flex; justify-content: space-between; align-items: center;
-}
+.modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;}
 .modal-header h3 { font-size: 18px; color: #111827; margin: 0; }
 .btn-close { background: transparent; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; transition: 0.2s;}
 .btn-close:hover { color: #ef4444; transform: rotate(90deg); }
 .modal-body { padding: 24px; }
-.modal-warning {
-    background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 16px;
-    display: flex; gap: 12px; color: #b45309; font-size: 14px; line-height: 1.5;
-}
-.modal-warning i { font-size: 20px; color: #f59e0b; margin-top: 2px; }
+.modal-warning { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; display: flex; gap: 12px; font-size: 14px; line-height: 1.5;}
+.modal-warning i { font-size: 20px; margin-top: 2px; }
 .modal-warning p { margin: 0; }
-.modal-footer {
-    padding: 16px 24px; background: #f9fafb; border-top: 1px solid #f3f4f6;
-    display: flex; justify-content: flex-end; gap: 12px;
-}
+.modal-footer { padding: 16px 24px; background: #f9fafb; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: 12px;}
