@@ -48,7 +48,7 @@ const i18n = {
     zh: {
         app_title: "魔方简历", app_badge: "青春版", export_pdf: "导出高清 PDF",
         tab_modules: "模块管理", tab_layout: "排版设置", drag_hint: "拖拽左侧图标排序，点击眼睛隐藏。",
-        smart_fit: "智能一键铺满纸张", // 新增
+        smart_fit: "智能一键铺满纸张",
         add_list: "新增经历模块", add_text: "新增文本模块", tpl_select: "排版风格",
         tpl_left: "左对齐", tpl_center: "居中对齐", tpl_right: "右对齐",
         bg_color: "简历背景颜色", font_hierarchy: "字体排版层级", font_name: "大标题",
@@ -68,7 +68,7 @@ const i18n = {
     en: {
         app_title: "Cube Resume", app_badge: "Youth", export_pdf: "Export HD PDF",
         tab_modules: "Modules", tab_layout: "Layout", drag_hint: "Drag icons to sort, click eye to hide.",
-        smart_fit: "Smart Fit to Page", // 新增
+        smart_fit: "Smart Fit to Page", 
         add_list: "Add Experience", add_text: "Add Text Block", tpl_select: "Layout Style",
         tpl_left: "Left Align", tpl_center: "Centered", tpl_right: "Right Align",
         bg_color: "Background Color", font_hierarchy: "Typography", font_name: "Name",
@@ -114,7 +114,7 @@ const els = {
 };
 
 function init() {
-    loadStateFromLocal(); // 启动时尝试读取缓存
+    loadStateFromLocal(); 
     bindTabEvents();
     bindTemplateEvents();
     bindLangEvent();
@@ -133,7 +133,6 @@ function init() {
     renderEditor();
     renderPreview();
 
-    // 核心：使用 ResizeObserver 监听内容高度变化，自动重绘背景纸张，无需手动刷新
     const resizeObserver = new ResizeObserver(() => updatePageBackgrounds());
     resizeObserver.observe(els.contentWrap);
 }
@@ -146,10 +145,8 @@ function updatePageBackgrounds() {
     const a4PxHeight = measureEl.clientHeight; 
     const totalHeight = els.contentWrap.clientHeight;
     
-    // 计算当前内容占据了多少页（至少1页）
     const pagesNeeded = Math.max(1, Math.ceil(totalHeight / a4PxHeight));
     
-    // 如果需要的纸张数量与当前 DOM 中不同，则重绘底层纸张
     if (els.pagesBgWrap.children.length !== pagesNeeded) {
         els.pagesBgWrap.innerHTML = '';
         for (let i = 0; i < pagesNeeded; i++) {
@@ -166,11 +163,10 @@ function updatePageBackgrounds() {
 function bindSmartFitEvent() {
     els.btnSmartFit.addEventListener('click', () => {
         const a4PxHeight = document.getElementById('a4-measure').clientHeight;
-        const targetHeight = a4PxHeight * 0.96; // 目标为A4纸高度的 96%
+        const targetHeight = a4PxHeight * 0.96; 
         let currentH = els.contentWrap.clientHeight;
         let loops = 0;
         
-        // 启发式算法：如果在 1页内且不满，则放大参数
         if (currentH < targetHeight) {
             while (els.contentWrap.clientHeight < targetHeight && loops < 25) {
                 let changed = false;
@@ -179,12 +175,11 @@ function bindSmartFitEvent() {
                 if(state.config.pageMargin < 28) { state.config.pageMargin += 1; changed = true; }
                 if(!changed) break;
                 
-                state.config.lineHeight = parseFloat(state.config.lineHeight.toFixed(1)); // 精度修正
+                state.config.lineHeight = parseFloat(state.config.lineHeight.toFixed(1)); 
                 applyCSSVariables();
                 loops++;
             }
         } 
-        // 启发式算法：如果溢出到了第2页一点点（小于 1.3 页），尝试缩小参数挤回1页
         else if (currentH > a4PxHeight && currentH < a4PxHeight * 1.3) {
             while (els.contentWrap.clientHeight > targetHeight && loops < 25) {
                 let changed = false;
@@ -199,7 +194,6 @@ function bindSmartFitEvent() {
             }
         }
         
-        // 将计算结果同步回左侧 UI 控件
         document.getElementById('slider-line-height').value = state.config.lineHeight;
         document.querySelector('#stepper-line-height .num-display').value = state.config.lineHeight;
         document.getElementById('slider-page-margin').value = state.config.pageMargin;
@@ -219,19 +213,14 @@ window.closeExportModal = function() {
 }
 
 function bindExportEvents() {
-    // 点击顶部导出，先呼出预览弹窗
     els.btnPreExport.addEventListener('click', () => {
         els.exportModal.classList.add('active');
     });
 
-    // 确认导出：规避仿真分页 UI 干扰的魔法
     els.btnConfirmExport.addEventListener('click', () => {
         closeExportModal();
         
         const element = els.contentWrap;
-        
-        // 【关键】为了让 html2pdf 正常工作并带有背景色，临时把背景色赋给连续的 contentWrap
-        // 这样 html2pdf 会把它当做一个完整的超长图进行标准切割，完美避开我们 UI 上为了提醒用户做的断层缝隙
         const originalBg = element.style.backgroundColor;
         element.style.backgroundColor = state.config.bgColor;
         
@@ -246,7 +235,7 @@ function bindExportEvents() {
         document.body.style.overflow = 'visible';
         html2pdf().set(opt).from(element).save().then(() => {
             document.body.style.overflow = 'hidden'; 
-            element.style.backgroundColor = originalBg; // 恢复透明，保持仿真分页 UI
+            element.style.backgroundColor = originalBg; 
         });
     });
 }
@@ -417,7 +406,25 @@ function renderEditor() {
     els.editorArea.innerHTML = html;
 }
 
-window.updateModuleTitle = function(id, val) { state.modules.find(m => m.id === id).title = val; renderModuleList(); renderEditor(); renderPreview(); saveStateToLocal();}
+// === 核心修复点：重写 updateModuleTitle，去掉 renderEditor() 防止失去焦点 ===
+window.updateModuleTitle = function(id, val) { 
+    state.modules.find(m => m.id === id).title = val; 
+    
+    // 1. 更新其他区域，不碰当前编辑器主体
+    renderModuleList(); 
+    renderPreview(); 
+    saveStateToLocal();
+    
+    // 2. 定向更新编辑器内部的子标题（如：“项目经历 一”），实现所见即所得
+    const mod = state.modules.find(m => m.id === id);
+    if (mod && mod.type === 'list') {
+        const headers = document.querySelectorAll('.list-item-header span');
+        headers.forEach((header, index) => {
+            header.innerHTML = `<i class="fas fa-bookmark" style="color:#cbd5e1; margin-right:8px;"></i>${getIndexedTitle(mod.title, index + 1)}`;
+        });
+    }
+}
+
 window.updateBasicData = function(id, key, val) { state.modules.find(m => m.id === id).data[key] = val; renderPreview(); saveStateToLocal();}
 window.updateTextContent = function(id, val) { state.modules.find(m => m.id === id).content = val; renderPreview(); saveStateToLocal();}
 window.updateListItem = function(modId, itemId, key, val) { state.modules.find(m => m.id === modId).items.find(i => i.id === itemId)[key] = val; renderPreview(); saveStateToLocal();}
@@ -440,7 +447,6 @@ function renderPreview() {
             html += `</div>`;
         }
     });
-    // 注意：内容现在被注入到顶层的包装器中
     els.contentWrap.innerHTML = html;
 }
 
