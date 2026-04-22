@@ -17,14 +17,51 @@ let state = {
     },
     activeModuleId: null,
     modules: [
-        { id: 'mod_basic', type: 'basic', visible: true, title: '基本信息', data: { name: '张三', phone: '138-0000-0000', email: 'zhangsan@example.com', location: '北京市', intent: '目标职位：前端开发', photo: '' } },
-        { id: 'mod_edu', type: 'list', visible: true, title: '教育经历', items: [{ id: generateId(), title: '某某高等学府', subtitle: '计算机科学与技术 (本科)', date: '2018.09 - 2022.06', desc: '<ul><li>GPA: 3.8/4.0，专业排名前 5%</li><li>获得国家励志奖学金</li></ul>' }] },
-        { id: 'mod_exp', type: 'list', visible: true, title: '工作经历', items: [{ id: generateId(), title: '某某科技有限公司', subtitle: '前端开发工程师', date: '2022.07 - 至今', desc: '负责公司核心业务系统的重构，提升了页面加载速度 30%。\n主导开发了内部可视化低代码平台，节省了开发团队约 40% 的重复工作量。' }] },
-        { id: 'mod_skill', type: 'text', visible: true, title: '专业技能', content: '精通 HTML/CSS/JavaScript，熟练掌握 Vue 和 React，熟悉前端工程化与性能优化方案。' }
+        { 
+            id: 'mod_basic', type: 'basic', visible: true, title: '个人信息', 
+            data: { 
+                name: '沈知珩', 
+                phone: '136-9988-2211', 
+                email: 'shenzhiheng@protonmail.com', 
+                location: '深圳市', 
+                intent: '求职意向：AI 产品负责人 / 智能硬件高级产品经理\n证书：PMP、数据分析高级认证 | 英语：CET-6、商务流利', 
+                photo: '' 
+            } 
+        },
+        { 
+            id: 'mod_edu', type: 'list', visible: true, title: '教育背景', 
+            items: [
+                { id: generateId(), title: '北京大学光华管理学院', subtitle: '商业分析 | 硕士', date: '2020.09 – 2023.06', desc: '<ul><li>主修：产品战略、用户增长、商业模型、AI 商业化</li><li>导师项目：《智能硬件产品全球化增长策略》负责人</li></ul>' },
+                { id: generateId(), title: '清华大学', subtitle: '电子信息工程 | 本科', date: '2016.09 – 2020.06', desc: '<ul><li>GPA 3.8/4.0，专业前 5%，获国家奖学金、学业优秀一等奖、科创特等奖</li><li>清华 AI 兴趣小组核心成员、机器人队产品负责人</li><li>发表校级论文《基于深度学习的用户意图识别系统》</li></ul>' }
+            ] 
+        },
+        { 
+            id: 'mod_exp', type: 'list', visible: true, title: '工作经历', 
+            items: [
+                { id: generateId(), title: '头部 AI 科技公司', subtitle: '高级产品经理（AI + 硬件）', date: '2023.07 – 至今', desc: '<ul><li>主导 AI 全景影像 / 智能运动相机产品线从 0 到 1 落地，年度营收破 1.2 亿。</li><li>搭建 AI 自动剪辑、场景识别、追踪拍摄核心功能，用户满意度提升 42%。</li><li>负责跨部门团队（产品/研发/算法/设计/市场/供应链）整体项目管理。</li><li>制定产品 roadmap，完成 3 代硬件迭代，竞品行业排名进入 TOP3。</li><li>输出用户研究、需求池、PRD、数据分析体系，提升团队效率 60%。</li><li>推动海外市场上线，支持多语言 AI 交互，海外销量占比达 35%。</li></ul>' },
+                { id: generateId(), title: '互联网大厂（对标字节/阿里）', subtitle: '产品经理（增长与商业化）', date: '2020.07 – 2023.06', desc: '<ul><li>负责亿级用户 APP 增长策略，实现年度新增用户 3200 万。</li><li>搭建 AI 推荐引擎、用户分层体系、全链路转化漏斗，转化率提升 28%。</li><li>主导大型活动策划与落地，单场活动 GMV 超 8000 万。</li><li>建立数据看板体系，周度复盘驱动策略迭代，大幅降低获客成本。</li><li>输出行业分析报告多篇，被公司级战略会议采纳。</li></ul>' }
+            ] 
+        },
+        { 
+            id: 'mod_proj', type: 'list', visible: true, title: '核心项目经历', 
+            items: [
+                { id: generateId(), title: 'AI 智能影像硬件产品', subtitle: '项目总负责人', date: '2023.07 – 至今', desc: '<ul><li>定义产品定位：AI + 全景拍摄 + 运动相机 + 自动剪辑一体化旗舰产品。</li><li>完成用户调研 1000+ 份，竞品分析 20+ 品牌，输出完整产品战略。</li><li>主导 AI 算法落地：智能追踪、防抖优化、一键成片、语音控制。</li><li>带领 18 人团队完成研发、测试、量产、上市全流程。</li><li>上市 6 个月销量破 15 万台，成为细分领域爆款机型。</li></ul>' },
+                { id: generateId(), title: '全球用户增长 AI 系统', subtitle: '核心产品负责人', date: '2020.07 – 2023.06', desc: '<ul><li>构建 AI 用户画像、智能触达、个性化推荐系统。</li><li>覆盖全球 12 个国家，支持 7 种语言，留存提升 23%。</li><li>实现自动化投放、智能素材生成、ROI 优化闭环。</li><li>年度节省营销成本超 2000 万。</li></ul>' }
+            ] 
+        },
+        { 
+            id: 'mod_skill', type: 'text', visible: true, title: '专业能力', 
+            content: '<ul><li><b>产品能力：</b>全栈产品设计、战略规划、需求分析、PRD、项目管理、商业化落地</li><li><b>AI 能力：</b>大模型应用、提示词工程、AI 交互设计、智能硬件 AI 功能落地</li><li><b>数据能力：</b>SQL、Python、用户行为分析、漏斗模型、A/B 测试、数据驱动决策</li><li><b>工具软件：</b>Axure、Figma、XMind、Notion、飞书、Tableau、Jira</li><li><b>语言与管理：</b>英语商务流利（CET-6）、日语基础；具备跨部门协同、海外对接、供应链沟通经验</li></ul>' 
+        },
+        { 
+            id: 'mod_eval', type: 'text', visible: true, title: '自我评价', 
+            content: '具备清北教育背景与大厂硬核履历，拥有 AI + 智能硬件全栈经验，擅长从 0 到 1 打造爆款产品、搭建商业化体系、推动全球化增长。逻辑极强，视野开阔，具备战略思维、产品思维、数据思维、商业思维合一的综合能力。能独立负责千万级/亿级产品线，抗压能力强，执行力顶尖，适合担任核心项目负责人角色。' 
+        }
     ]
 };
 
-const LOCAL_STORAGE_KEY = 'cube_resume_state_v1_1';
+// 【关键更新】：更改了缓存的 Key，强制浏览器加载我们刚刚写入的新数据
+const LOCAL_STORAGE_KEY = 'cube_resume_state_v1_2';
 
 // 本地缓存存取
 function saveStateToLocal() {
@@ -35,7 +72,7 @@ function loadStateFromLocal() {
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
-            Object.assign(state.config, parsed.config); // 合并配置防丢键
+            Object.assign(state.config, parsed.config); 
             state.modules = parsed.modules || state.modules;
             state.lang = parsed.lang || state.lang;
             state.template = parsed.template || state.template;
@@ -347,7 +384,6 @@ function initSortable() {
     });
 }
 
-// 数据与渲染逻辑 (合并 SaveLocal)
 function formatText(text) { if (!text) return ''; return /<[a-z][\s\S]*>/i.test(text) ? text : text.replace(/\n/g, '<br>'); }
 function getIndexedTitle(baseTitle, index) {
     if (state.lang === 'en') return `${baseTitle} ${index}`;
@@ -406,16 +442,11 @@ function renderEditor() {
     els.editorArea.innerHTML = html;
 }
 
-// === 核心修复点：重写 updateModuleTitle，去掉 renderEditor() 防止失去焦点 ===
 window.updateModuleTitle = function(id, val) { 
     state.modules.find(m => m.id === id).title = val; 
-    
-    // 1. 更新其他区域，不碰当前编辑器主体
     renderModuleList(); 
     renderPreview(); 
     saveStateToLocal();
-    
-    // 2. 定向更新编辑器内部的子标题（如：“项目经历 一”），实现所见即所得
     const mod = state.modules.find(m => m.id === id);
     if (mod && mod.type === 'list') {
         const headers = document.querySelectorAll('.list-item-header span');
