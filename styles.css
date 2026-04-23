@@ -1,6 +1,7 @@
 :root {
-    --app-bg: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    --panel-bg: rgba(255, 255, 255, 0.85);
+    /* 🚀 背景换为极简纯色灰，消除由于渐变引起的切割线遮罩问题 */
+    --app-bg: #f3f4f6;
+    --panel-bg: rgba(255, 255, 255, 0.95);
     --border-color: rgba(229, 231, 235, 0.6);
     --primary-color: #6366f1; 
     --primary-hover: #4f46e5;
@@ -9,7 +10,7 @@
     
     --r-bg-color: #ffffff;
     --r-line-height: 1.4;
-    --r-margin-v: 10mm;
+    --r-margin-v: 12mm; 
     --r-margin-h: 14mm;
     --r-module-spacing: 15px; 
     
@@ -23,10 +24,9 @@
 body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--app-bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* 导航与 UI 面板 */
-.top-nav { height: 64px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; flex-shrink: 0; box-shadow: 0 1px 0 rgba(0,0,0,0.05); z-index: 10; }
+.top-nav { height: 64px; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; flex-shrink: 0; box-shadow: 0 1px 0 rgba(0,0,0,0.05); z-index: 10; }
 .logo { font-size: 18px; font-weight: 800; color: #111827; display: flex; align-items: center; gap: 8px;}
 .logo-icon { background: var(--primary-color); color: white; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px;}
-.badge { background: #fef08a; color: #854d0e; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: bold; margin-left: 5px;}
 
 .btn { padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; justify-content: center;}
 .btn:active:not(:disabled) { transform: scale(0.97); }
@@ -43,7 +43,7 @@ body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI"
 .text-muted { color: var(--text-muted); }
 
 .app-container { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
-.panel { background: var(--panel-bg); backdrop-filter: blur(16px); border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); display: flex; flex-direction: column; overflow: hidden; }
+.panel { background: var(--panel-bg); border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(229,231,235,0.6); display: flex; flex-direction: column; overflow: hidden; }
 
 .sidebar { width: 340px; flex-shrink: 0; }
 .editor { width: 450px; flex-shrink: 0; }
@@ -118,8 +118,46 @@ textarea { height: 120px; resize: vertical; }
 .list-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; font-size: 14px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;}
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 80px; font-size: 14px; }
 
+/* 弹窗样式 */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
 
-/* ================= 引擎重构：单一完美纸张 + 视觉断层 ================= */
+.modal-overlay.full-screen-modal {
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(15px); 
+}
+.modal-content.large-modal {
+    width: 95vw;
+    height: 95vh;
+    max-width: 1600px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.98); 
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+    transform: translateY(20px); transition: transform 0.3s ease;
+    overflow: hidden;
+}
+.modal-overlay.active .modal-content.large-modal { transform: translateY(0); }
+
+.modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;}
+.modal-header h3 { font-size: 18px; color: #111827; margin: 0; }
+.btn-close { background: transparent; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; transition: 0.2s;}
+.btn-close:hover { color: #ef4444; transform: rotate(90deg); }
+
+.modal-split-view { display: flex; flex: 1; overflow: hidden; padding: 0; }
+.modal-settings-panel { width: 360px; background: white; border-right: 1px solid #e5e7eb; padding: 20px; overflow-y: auto; }
+#modal-settings-container #tab-layout { display: block !important; padding: 0; }
+.modal-preview-panel { flex: 1; background: var(--app-bg); overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
+.modal-footer { padding: 16px 24px; background: #f9fafb; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; align-items: center; gap: 12px;}
+
+
+/* ================= 🚀 真实 A4 分离切割引擎 ================= */
 .resume-viewport {
     width: 100%;
     display: flex;
@@ -145,28 +183,32 @@ textarea { height: 120px; resize: vertical; }
     transition: background-color 0.3s ease;
 }
 
+/* 🚀 物理切割线：与背景色完美融合，制造分离纸张假象 */
 .visual-page-gap {
     position: absolute;
-    left: -5px; right: -5px;
-    height: 12px; /* 极简缝隙 */
-    background-color: #ebedee;
-    border-top: 1px solid #d1d5db;
-    border-bottom: 1px solid #d1d5db;
+    left: -30px; right: -30px; /* 覆盖两边阴影 */
+    height: 40px; /* 拉大缝隙，更具真实感 */
+    background-color: var(--app-bg);
+    border: none;
     transform: translateY(-50%); 
     z-index: 10;
     display: flex; align-items: center; justify-content: center;
     pointer-events: none; 
-    opacity: 0.9;
 }
-.gap-badge { background: #d1d5db; color: #4b5563; font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: bold; letter-spacing: 1px;}
-.resume-paper.export-mode .visual-page-gap { display: none !important; }
 
-/* 插入 DOM 的隐形垫片，彻底干掉 CSS Margin Collapsing Bug */
-.pagination-spacer {
-    display: block;
-    width: 100%;
-    clear: both;
+.gap-badge { 
+    background: var(--app-bg); 
+    color: #9ca3af; 
+    font-size: 11px; 
+    padding: 4px 12px; 
+    border-radius: 12px; 
+    font-weight: 600; 
+    letter-spacing: 1px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid rgba(229, 231, 235, 0.8);
 }
+.resume-paper.export-mode .visual-page-gap { display: none !important; }
+.pagination-spacer { display: block; width: 100%; clear: both; }
 
 /* --- 模块基础样式 --- */
 .r-module { margin-bottom: var(--r-module-spacing); } 
@@ -174,14 +216,7 @@ textarea { height: 120px; resize: vertical; }
 .r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); }
 .r-basic-name { font-family: var(--r-name-font); font-size: var(--r-name-size); font-weight: var(--r-name-weight); color: #111827; margin-bottom: 8px; letter-spacing: 2px;}
 .r-basic-details { font-size: 0.9em; color: #4b5563; }
-
-.r-basic-details i {
-    opacity: 0.75;           
-    width: 1.2em;            
-    text-align: center;
-    margin-right: 4px;
-}
-
+.r-basic-details i { opacity: 0.75; width: 1.2em; text-align: center; margin-right: 4px; }
 .r-basic-photo-wrap { width: 90px; height: 120px; flex-shrink: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .r-basic-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -191,10 +226,18 @@ textarea { height: 120px; resize: vertical; }
 .r-list-date { font-size: 0.9em; color: #4b5563; }
 .r-list-subtitle { margin-bottom: 4px; font-size: 0.95em; color: #374151; font-weight: bold;}
 
-/* 两端对齐，极简高端感 */
-.r-list-desc, .r-text-content { font-size: 1em; color: #4b5563; text-align: justify; }
-.r-list-desc ul, .r-text-content ul { padding-left: 20px; margin-top: 4px; }
-.r-list-desc li, .r-text-content li { margin-bottom: 2px; }
+ul.formatted-list, .r-list-desc ul, .r-text-content ul { 
+    padding-left: 1.1em; 
+    margin-top: 4px; 
+    margin-bottom: 0; 
+}
+.r-list-desc li, .r-text-content li, li.p-line { 
+    margin-bottom: 4px; 
+    text-align: justify; 
+    list-style-type: disc; 
+}
+
+.r-basic-info .p-line { list-style: none; margin-bottom: 2px; }
 
 .tpl-left .r-basic-info { text-align: left; }
 .tpl-left .r-basic-info.has-photo { display: flex; align-items: flex-start; justify-content: space-between; }
@@ -213,23 +256,3 @@ textarea { height: 120px; resize: vertical; }
 .tpl-right .r-basic-text { order: 2; flex: 1; }
 .tpl-right .r-basic-photo-wrap { order: 1; margin-right: 20px; }
 .tpl-right .r-basic-details span { margin: 0 0 0 12px; display: inline-block; }
-
-/* Modal 弹窗样式 */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
-    display: none; align-items: center; justify-content: center; z-index: 1000;
-    opacity: 0; transition: opacity 0.3s ease;
-}
-.modal-overlay.active { display: flex; opacity: 1; }
-.modal-content { background: white; width: 420px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px); transition: transform 0.3s ease; overflow: hidden; }
-.modal-overlay.active .modal-content { transform: translateY(0); }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;}
-.modal-header h3 { font-size: 18px; color: #111827; margin: 0; }
-.btn-close { background: transparent; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; transition: 0.2s;}
-.btn-close:hover { color: #ef4444; transform: rotate(90deg); }
-.modal-body { padding: 24px; }
-.modal-warning { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; display: flex; gap: 12px; font-size: 14px; line-height: 1.5;}
-.modal-warning i { font-size: 20px; margin-top: 2px; }
-.modal-warning p { margin: 0; }
-.modal-footer { padding: 16px 24px; background: #f9fafb; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: 12px;}

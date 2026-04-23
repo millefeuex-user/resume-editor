@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple_Resume - 在线简历生成器 v1.13</title>
+    <title>Simple_Resume - 在线简历生成器 v1.16</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,7 +12,7 @@
         <div class="nav-left" style="display: flex; align-items: center; gap: 20px;">
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-magic"></i></div>
-                <span data-i18n="app_title">Simple_Resume</span> <span class="badge" data-i18n="app_badge">青春版</span>
+                <span data-i18n="app_title">Simple_Resume</span>
             </div>
             
             <div class="history-actions" style="display: flex; gap: 8px; border-left: 1px solid #e5e7eb; padding-left: 20px;">
@@ -215,20 +215,25 @@
 
     <div id="a4-measure" style="width: 210mm; height: 297mm; position: absolute; visibility: hidden; z-index: -999;"></div>
 
-    <div id="export-modal" class="modal-overlay">
-        <div class="modal-content">
+    <div id="export-modal" class="modal-overlay full-screen-modal">
+        <div class="modal-content large-modal">
             <div class="modal-header">
-                <h3 data-i18n="modal_export_title">PDF 导出确认</h3>
+                <h3 data-i18n="modal_export_title">导出前最终排版预览</h3>
                 <button class="btn-close" onclick="closeExportModal()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body">
-                <div class="modal-warning">
-                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                    <p data-i18n="modal_warning_text" style="color: #065f46;">已开启超精细行级物理分页引擎，文字边界已被绝对保护。如果觉得最后一页太空，可以点击左侧的“智能一键铺满”。</p>
+            
+            <div class="modal-body modal-split-view">
+                <div class="modal-settings-panel" id="modal-settings-container"></div>
+                
+                <div class="modal-preview-panel preview-scroll-area">
+                    <div class="resume-viewport">
+                        <div id="modal-resume-paper" class="resume-paper tpl-left"></div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeExportModal()" data-i18n="btn_cancel">再调调</button>
+
+            <div class="modal-footer" style="justify-content: flex-end;">
+                <button class="btn btn-outline" onclick="closeExportModal()" data-i18n="btn_cancel">取消返回</button>
                 <button class="btn btn-primary" id="btn-export-pdf"><i class="fas fa-file-pdf"></i> <span data-i18n="btn_confirm_export">确认无误并导出</span></button>
             </div>
         </div>

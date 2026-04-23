@@ -7,7 +7,7 @@ let state = {
     config: {
         bgColor: '#ffffff',    
         lineHeight: 1.4,       
-        marginV: 10,  
+        marginV: 12,  
         marginH: 14,  
         moduleSpacing: 15,
         nameFont: 'system-ui, -apple-system, sans-serif', nameSize: 26, nameBold: true,
@@ -38,7 +38,7 @@ let state = {
     ]
 };
 
-const LOCAL_STORAGE_KEY = 'simple_resume_state_v1_13';
+const LOCAL_STORAGE_KEY = 'simple_resume_state_v1_16';
 
 // ==========================================
 // 历史记录引擎
@@ -60,7 +60,9 @@ function redo() { if (historyIndex < historyStack.length - 1) { isUndoRedoing = 
 
 function restoreState(stateJSON) {
     state = JSON.parse(stateJSON); localStorage.setItem(LOCAL_STORAGE_KEY, stateJSON); 
-    applyCSSVariables(); els.paper.className = `resume-paper ${state.template}`;
+    applyCSSVariables(); 
+    els.paper.className = `resume-paper ${state.template}`;
+    if (els.modalPaper) els.modalPaper.className = `resume-paper ${state.template}`;
     syncConfigUI(); translateUI(); renderModuleList(); renderEditor(); renderPreview();
 }
 
@@ -84,12 +86,12 @@ function loadStateFromLocal() {
 // ==========================================
 const i18n = {
     zh: {
-        app_title: "Simple_Resume", app_badge: "青春版", export_pdf: "导出高清 PDF",
-        tab_modules: "模块管理", tab_layout: "排版设置", drag_hint: "拖拽左侧图标排序，点击眼睛隐藏。", smart_fit: "智能一键铺满纸张", add_list: "新增经历模块", add_text: "新增文本模块", tpl_select: "排版风格", tpl_left: "左对齐", tpl_center: "居中对齐", tpl_right: "右对齐", bg_color: "简历背景颜色", font_hierarchy: "字体排版层级", font_name: "大标题", font_title: "一级标题", font_sub: "二级标题", font_text: "全局正文", font_sans: "默认黑体", font_serif: "经典宋体", font_kai: "优雅楷体", line_height: "全局行高", margin_v: "上下页边距 (mm)", margin_h: "左右页边距 (mm)", mod_spacing: "模块间距 (px)", mod_edit: "模块编辑", select_mod_hint: "请在左侧选择一个模块进行编辑", def_basic: "基本信息", def_edu: "教育经历", def_exp: "工作经历", def_skill: "专业技能", def_new_list: "新经历模块", def_new_text: "新文本模块", def_title: "主标题", def_sub: "副标题", def_date: "时间", def_desc: "描述...", btn_add: "添加经历项", alert_min: "至少保留一项！", confirm_del: "确定删除该项？", confirm_del_mod: "确定要删除这个模块吗？", l_mod_title: "模块显示标题", l_photo: "个人照片", l_name: "姓名", l_intent: "求职意向/个人总结", l_text_content: "文本内容 (支持回车换行或 HTML 标签)", l_main_title: "主标题 (公司/学校)", l_sub_title: "副标题 (职位/专业)", l_time: "时间区间", l_detail: "详细描述 (支持回车换行或 HTML)", btn_remove_photo: "移除照片", modal_export_title: "PDF 导出确认", modal_warning_text: "已开启行级超精细防割裂引擎，文字已被安全推至次页。如果感觉留白太多，请点击左侧“智能铺满”。", btn_cancel: "再调调", btn_confirm_export: "确认无误并导出", add_info_item: "添加自定义信息"
+        app_title: "Simple_Resume", export_pdf: "导出高清 PDF",
+        tab_modules: "模块管理", tab_layout: "排版设置", drag_hint: "拖拽左侧图标排序，点击眼睛隐藏。", smart_fit: "智能一键铺满纸张", add_list: "新增经历模块", add_text: "新增文本模块", tpl_select: "排版风格", tpl_left: "左对齐", tpl_center: "居中对齐", tpl_right: "右对齐", bg_color: "简历背景颜色", font_hierarchy: "字体排版层级", font_name: "大标题", font_title: "一级标题", font_sub: "二级标题", font_text: "全局正文", font_sans: "默认黑体", font_serif: "经典宋体", font_kai: "优雅楷体", line_height: "全局行高", margin_v: "上下页边距 (mm)", margin_h: "左右页边距 (mm)", mod_spacing: "模块间距 (px)", mod_edit: "模块编辑", select_mod_hint: "请在左侧选择一个模块进行编辑", def_basic: "基本信息", def_edu: "教育经历", def_exp: "工作经历", def_skill: "专业技能", def_new_list: "新经历模块", def_new_text: "新文本模块", def_title: "主标题", def_sub: "副标题", def_date: "时间", def_desc: "描述...", btn_add: "添加经历项", alert_min: "至少保留一项！", confirm_del: "确定删除该项？", confirm_del_mod: "确定要删除这个模块吗？", l_mod_title: "模块显示标题", l_photo: "个人照片", l_name: "姓名", l_intent: "求职意向/个人总结", l_text_content: "文本内容 (支持回车换行或 HTML 标签)", l_main_title: "主标题 (公司/学校)", l_sub_title: "副标题 (职位/专业)", l_time: "时间区间", l_detail: "详细描述 (支持回车换行或 HTML)", btn_remove_photo: "移除照片", modal_export_title: "最终排版与预览", btn_cancel: "取消返回", btn_confirm_export: "确认无误并导出", add_info_item: "添加自定义信息"
     },
     en: {
-        app_title: "Simple_Resume", app_badge: "Youth", export_pdf: "Export HD PDF",
-        tab_modules: "Modules", tab_layout: "Layout", drag_hint: "Drag icons to sort, click eye to hide.", smart_fit: "Smart Fit to Page", add_list: "Add Experience", add_text: "Add Text Block", tpl_select: "Layout Style", tpl_left: "Left Align", tpl_center: "Centered", tpl_right: "Right Align", bg_color: "Background Color", font_hierarchy: "Typography", font_name: "Name", font_title: "H1 Title", font_sub: "H2 Title", font_text: "Body Text", font_sans: "Sans-Serif", font_serif: "Serif", font_kai: "Script", line_height: "Line Height", margin_v: "V-Margin (mm)", margin_h: "H-Margin (mm)", mod_spacing: "Mod Spacing (px)", mod_edit: "Module Editor", select_mod_hint: "Please select a module on the left to edit", def_basic: "Basic Info", def_edu: "Education", def_exp: "Experience", def_skill: "Skills", def_new_list: "New Experience", def_new_text: "New Text Block", def_title: "Main Title", def_sub: "Subtitle", def_date: "Date", def_desc: "Description...", btn_add: "Add Item", alert_min: "Keep at least one item!", confirm_del: "Delete this item?", confirm_del_mod: "Delete this module?", l_mod_title: "Display Title", l_photo: "Photo", l_name: "Name", l_intent: "Intent/Summary", l_text_content: "Text Content", l_main_title: "Main Title", l_sub_title: "Subtitle", l_time: "Time Period", l_detail: "Details", btn_remove_photo: "Remove Photo", modal_export_title: "Export Confirmation", modal_warning_text: "Micro-Spacer Engine is ON. If there is too much whitespace, please click 'Smart Fit' on the left.", btn_cancel: "Adjust", btn_confirm_export: "Confirm & Export", add_info_item: "Add Custom Field"
+        app_title: "Simple_Resume", export_pdf: "Export HD PDF",
+        tab_modules: "Modules", tab_layout: "Layout", drag_hint: "Drag icons to sort, click eye to hide.", smart_fit: "Smart Fit to Page", add_list: "Add Experience", add_text: "Add Text Block", tpl_select: "Layout Style", tpl_left: "Left Align", tpl_center: "Centered", tpl_right: "Right Align", bg_color: "Background Color", font_hierarchy: "Typography", font_name: "Name", font_title: "H1 Title", font_sub: "H2 Title", font_text: "Body Text", font_sans: "Sans-Serif", font_serif: "Serif", font_kai: "Script", line_height: "Line Height", margin_v: "V-Margin (mm)", margin_h: "H-Margin (mm)", mod_spacing: "Mod Spacing (px)", mod_edit: "Module Editor", select_mod_hint: "Please select a module on the left to edit", def_basic: "Basic Info", def_edu: "Education", def_exp: "Experience", def_skill: "Skills", def_new_list: "New Experience", def_new_text: "New Text Block", def_title: "Main Title", def_sub: "Subtitle", def_date: "Date", def_desc: "Description...", btn_add: "Add Item", alert_min: "Keep at least one item!", confirm_del: "Delete this item?", confirm_del_mod: "Delete this module?", l_mod_title: "Display Title", l_photo: "Photo", l_name: "Name", l_intent: "Intent/Summary", l_text_content: "Text Content", l_main_title: "Main Title", l_sub_title: "Subtitle", l_time: "Time Period", l_detail: "Details", btn_remove_photo: "Remove Photo", modal_export_title: "Final Export Preview", btn_cancel: "Cancel", btn_confirm_export: "Confirm & Export", add_info_item: "Add Custom Field"
     }
 };
 
@@ -104,16 +106,40 @@ function getStandardIcon(iconStr) {
 function formatText(text) { 
     if (!text) return ''; 
     if (/<[a-z][\s\S]*>/i.test(text)) return text; 
-    return text.split('\n').filter(l => l.trim() !== '').map(l => `<div class="p-line"><ul><li>${l}</li></ul></div>`).join(''); 
+    return `<ul class="formatted-list">` + text.split('\n').filter(l => l.trim() !== '').map(l => `<li class="p-line">${l}</li>`).join('') + `</ul>`; 
+}
+
+function formatBasicText(text) {
+    if (!text) return '';
+    if (/<[a-z][\s\S]*>/i.test(text)) return text;
+    return text.split('\n').filter(l => l.trim() !== '').map(l => `<div class="p-line">${l}</div>`).join('');
 }
 
 const rootVars = document.documentElement.style;
-const els = { btnLang: document.getElementById('btn-toggle-lang'), langText: document.getElementById('lang-text'), btnPreExport: document.getElementById('btn-pre-export'), btnConfirmExport: document.getElementById('btn-export-pdf'), btnSmartFit: document.getElementById('btn-smart-fit'), exportModal: document.getElementById('export-modal'), tabBtns: document.querySelectorAll('.tab-btn'), tabContents: document.querySelectorAll('.tab-content'), tplCards: document.querySelectorAll('.tpl-card'), bgColorPicker: document.getElementById('config-bg-color'), moduleList: document.getElementById('module-list'), editorArea: document.getElementById('dynamic-editor-area'), editorHeader: document.getElementById('editor-header'), paper: document.getElementById('resume-paper') };
+const els = { 
+    btnLang: document.getElementById('btn-toggle-lang'), 
+    langText: document.getElementById('lang-text'), 
+    btnPreExport: document.getElementById('btn-pre-export'), 
+    btnConfirmExport: document.getElementById('btn-export-pdf'), 
+    btnSmartFit: document.getElementById('btn-smart-fit'), 
+    exportModal: document.getElementById('export-modal'), 
+    tabBtns: document.querySelectorAll('.tab-btn'), 
+    tabContents: document.querySelectorAll('.tab-content'), 
+    tplCards: document.querySelectorAll('.tpl-card'), 
+    bgColorPicker: document.getElementById('config-bg-color'), 
+    moduleList: document.getElementById('module-list'), 
+    editorArea: document.getElementById('dynamic-editor-area'), 
+    editorHeader: document.getElementById('editor-header'), 
+    paper: document.getElementById('resume-paper'),
+    modalPaper: document.getElementById('modal-resume-paper') 
+};
 
 function init() {
     loadStateFromLocal(); bindTabEvents(); bindTemplateEvents(); bindLangEvent(); initConfigPanel(); initFontControls(); initSortable(); bindExportEvents(); bindSmartFitEvent(); bindHistoryEvents(); 
     if(!state.activeModuleId || !state.modules.find(m => m.id === state.activeModuleId)) state.activeModuleId = state.modules[0].id; 
     els.paper.className = `resume-paper ${state.template}`;
+    if (els.modalPaper) els.modalPaper.className = `resume-paper ${state.template}`;
+    
     syncConfigUI(); translateUI(); renderModuleList(); renderEditor(); renderPreview(); pushHistory();
 }
 
@@ -134,7 +160,7 @@ function syncConfigUI() {
     });
 }
 
-function renderPreview(enablePagination = true) {
+function buildResumeHTML() {
     let html = '';
     state.modules.forEach(mod => {
         if (!mod.visible) return; 
@@ -143,7 +169,7 @@ function renderPreview(enablePagination = true) {
                 const stdIcon = getStandardIcon(info.icon);
                 return `<span>${stdIcon ? `<i class="${stdIcon}"></i>` : ''}${info.val}</span>`;
             }).join('');
-            html += `<div class="r-module r-basic-info ${mod.data.photo ? 'has-photo' : ''}"><div class="r-basic-text"><div class="r-basic-name">${mod.data.name}</div><div class="r-basic-details">${infoItemsHTML}</div>${mod.data.intent ? `<div style="margin-top:8px; color: #374151;">${formatText(mod.data.intent)}</div>` : ''}</div>${mod.data.photo ? `<div class="r-basic-photo-wrap"><img src="${mod.data.photo}" /></div>` : ''}</div>`;
+            html += `<div class="r-module r-basic-info ${mod.data.photo ? 'has-photo' : ''}"><div class="r-basic-text"><div class="r-basic-name">${mod.data.name}</div><div class="r-basic-details">${infoItemsHTML}</div>${mod.data.intent ? `<div style="margin-top:8px; color: #374151;">${formatBasicText(mod.data.intent)}</div>` : ''}</div>${mod.data.photo ? `<div class="r-basic-photo-wrap"><img src="${mod.data.photo}" /></div>` : ''}</div>`;
         } else {
             html += `<div class="r-module">`;
             if (mod.title) html += `<div class="r-mod-title">${mod.title}</div>`;
@@ -156,33 +182,43 @@ function renderPreview(enablePagination = true) {
             html += `</div>`;
         }
     });
+    return html;
+}
+
+function renderPreview(enablePagination = true) {
+    let html = buildResumeHTML();
     
     els.paper.innerHTML = html;
+    if (enablePagination) applySmartPagination(els.paper);
     
-    if (enablePagination) {
-        applySmartPagination();
+    if (els.modalPaper && els.exportModal.classList.contains('active')) {
+        els.modalPaper.innerHTML = html;
+        els.modalPaper.className = `resume-paper ${state.template}`;
+        if (enablePagination) applySmartPagination(els.modalPaper);
     }
 }
 
-function applySmartPagination() {
-    const paper = els.paper; 
-    const a4PxHeight = document.getElementById('a4-measure').clientHeight;
+function applySmartPagination(paperTarget) {
+    if (!paperTarget) return;
     
-    paper.querySelectorAll('.visual-page-gap, .pagination-spacer').forEach(el => el.remove());
-    paper.style.height = 'auto'; 
-    void paper.offsetHeight; 
+    // 🚀 核心优化：获取绝对精准的高度，消除缩放造成的换算误差
+    const a4PxHeight = document.getElementById('a4-measure').getBoundingClientRect().height;
+    
+    paperTarget.querySelectorAll('.visual-page-gap, .pagination-spacer').forEach(el => el.remove());
+    paperTarget.style.height = 'auto'; 
+    void paperTarget.offsetHeight; 
 
-    const computedStyle = window.getComputedStyle(paper);
-    const paddingTop = parseFloat(computedStyle.paddingTop) || 40;
-    const paddingBottom = parseFloat(computedStyle.paddingBottom) || 40;
+    const computedStyle = window.getComputedStyle(paperTarget);
+    const paddingTop = parseFloat(computedStyle.paddingTop) || 45;
+    const paddingBottom = parseFloat(computedStyle.paddingBottom) || 45;
     const safeHeight = a4PxHeight - paddingBottom; 
 
-    const allTrackers = Array.from(paper.querySelectorAll('.r-basic-info, .r-mod-title, .r-list-header, .r-list-subtitle, .r-list-desc li, .r-text-content li, .r-text-content p, .p-line')).filter(b => b.offsetHeight > 0);
+    const allTrackers = Array.from(paperTarget.querySelectorAll('.r-basic-info, .r-mod-title, .r-list-header, .r-list-subtitle, li.p-line, div.p-line')).filter(b => b.offsetHeight > 0);
 
     for (let i = 0; i < allTrackers.length; i++) {
         let item = allTrackers[i];
         let rect = item.getBoundingClientRect();
-        let paperRect = paper.getBoundingClientRect();
+        let paperRect = paperTarget.getBoundingClientRect();
         
         let itemTop = rect.top - paperRect.top;
         let itemBottom = itemTop + rect.height;
@@ -205,7 +241,7 @@ function applySmartPagination() {
 
         if (pushToNextPage) {
             let targetTop = (pageStart + 1) * a4PxHeight + paddingTop;
-            itemTop = item.getBoundingClientRect().top - paper.getBoundingClientRect().top;
+            itemTop = item.getBoundingClientRect().top - paperTarget.getBoundingClientRect().top;
             let pushAmount = targetTop - itemTop;
             
             if (pushAmount > 0) {
@@ -220,30 +256,31 @@ function applySmartPagination() {
         }
     }
 
-    const totalHeight = paper.scrollHeight; 
+    const totalHeight = paperTarget.scrollHeight; 
     const totalPages = Math.ceil(totalHeight / a4PxHeight);
-    paper.style.height = `${totalPages * a4PxHeight}px`; 
+    
+    paperTarget.style.height = `${totalPages * 297}mm`; 
     
     for (let i = 1; i < totalPages; i++) {
         const gap = document.createElement('div'); 
         gap.className = 'visual-page-gap'; 
-        gap.style.top = `${i * a4PxHeight}px`; 
+        gap.style.top = `calc(${i} * 297mm)`; 
         gap.innerHTML = `<span class="gap-badge">Page ${i} - ${i+1}</span>`; 
-        paper.appendChild(gap);
+        paperTarget.appendChild(gap);
     }
 }
 
 function bindSmartFitEvent() {
     els.btnSmartFit.addEventListener('click', () => {
-        const paper = els.paper; 
-        const a4PxHeight = document.getElementById('a4-measure').clientHeight;
+        const activePaper = els.exportModal.classList.contains('active') ? els.modalPaper : els.paper;
+        const a4PxHeight = document.getElementById('a4-measure').getBoundingClientRect().height;
         
         const getRawHeight = () => {
             renderPreview(false); 
-            let trackers = Array.from(paper.querySelectorAll('.r-basic-info, .r-mod-title, .r-list-header, .r-list-subtitle, .r-list-desc li, .r-text-content li, .r-text-content p, .p-line')).filter(b => b.offsetHeight > 0);
+            let trackers = Array.from(activePaper.querySelectorAll('.r-basic-info, .r-mod-title, .r-list-header, .r-list-subtitle, li.p-line, div.p-line')).filter(b => b.offsetHeight > 0);
             if(trackers.length === 0) return 0;
             let last = trackers[trackers.length - 1];
-            return last.getBoundingClientRect().bottom - paper.getBoundingClientRect().top;
+            return last.getBoundingClientRect().bottom - activePaper.getBoundingClientRect().top;
         };
 
         let currentH = getRawHeight();
@@ -258,9 +295,7 @@ function bindSmartFitEvent() {
                 if(state.config.moduleSpacing < 25) { state.config.moduleSpacing += 1; changed = true; }
                 if(!changed) break; 
                 state.config.lineHeight = parseFloat(state.config.lineHeight.toFixed(2)); 
-                applyCSSVariables(); 
-                currentH = getRawHeight();
-                loops++;
+                applyCSSVariables(); currentH = getRawHeight(); loops++;
             }
         } else if (currentH > a4PxHeight * pages && currentH < a4PxHeight * (pages + 0.2)) {
             targetHeight = (pages - 1) * a4PxHeight * 0.95; 
@@ -270,26 +305,37 @@ function bindSmartFitEvent() {
                 if(state.config.moduleSpacing > 8) { state.config.moduleSpacing -= 1; changed = true; }
                 if(!changed) break; 
                 state.config.lineHeight = parseFloat(state.config.lineHeight.toFixed(2)); 
-                applyCSSVariables(); 
-                currentH = getRawHeight();
-                loops++;
+                applyCSSVariables(); currentH = getRawHeight(); loops++;
             }
         }
         
-        syncConfigUI(); 
-        saveStateToLocal(); 
-        pushHistory(); 
-        applySmartPagination();
+        syncConfigUI(); saveStateToLocal(); pushHistory(); renderPreview();
     });
 }
 
-window.closeExportModal = function() { els.exportModal.classList.remove('active'); }
+window.closeExportModal = function() { 
+    document.querySelector('.sidebar').insertBefore(document.getElementById('tab-layout'), document.querySelector('#tab-modules'));
+    els.exportModal.classList.remove('active'); 
+    renderPreview();
+}
+
 function bindExportEvents() {
-    els.btnPreExport.addEventListener('click', () => els.exportModal.classList.add('active'));
+    els.btnPreExport.addEventListener('click', () => {
+        document.getElementById('modal-settings-container').appendChild(document.getElementById('tab-layout'));
+        els.exportModal.classList.add('active');
+        renderPreview();
+    });
+    
     els.btnConfirmExport.addEventListener('click', () => {
-        closeExportModal(); els.paper.classList.add('export-mode');
-        const opt = { margin: 0, filename: 'Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-        document.body.style.overflow = 'visible'; html2pdf().set(opt).from(els.paper).save().then(() => { document.body.style.overflow = 'hidden'; els.paper.classList.remove('export-mode'); });
+        const targetPaper = els.modalPaper;
+        targetPaper.classList.add('export-mode');
+        const opt = { margin: 0, filename: 'Simple_Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        document.body.style.overflow = 'visible'; 
+        html2pdf().set(opt).from(targetPaper).save().then(() => { 
+            document.body.style.overflow = 'hidden'; 
+            targetPaper.classList.remove('export-mode'); 
+            closeExportModal(); 
+        });
     });
 }
 
@@ -354,8 +400,19 @@ function renderEditor() {
     els.editorHeader.textContent = `${t('mod_edit')} - ${mod.title}`; let html = '';
     if (mod.type !== 'basic') html += `<div class="control-group"><label>${t('l_mod_title')}</label><input type="text" value="${mod.title}" oninput="updateModuleTitle('${mod.id}', this.value)"></div><div class="divider"></div>`;
     
+    // 🚀 核心优化：高颜值现代化图片上传控件
     if (mod.type === 'basic') {
-        html += `<div class="control-group" style="background:#f9fafb; padding:15px; border-radius:12px; border:1px solid #d1d5db"><label><i class="fas fa-camera"></i> ${t('l_photo')}</label><input type="file" accept="image/*" onchange="uploadPhoto('${mod.id}', this)" style="font-size:13px;">${mod.data.photo ? `<div style="margin-top:10px;"><button class="btn btn-danger" onclick="removePhoto('${mod.id}')">${t('btn_remove_photo')}</button></div>` : ''}</div>
+        html += `
+        <div class="control-group" style="background:#f9fafb; padding:15px; border-radius:12px; border:1px solid #d1d5db">
+            <label style="margin-bottom:12px;"><i class="fas fa-camera"></i> ${t('l_photo')}</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <label for="photo-upload-${mod.id}" class="btn btn-outline" style="margin:0; cursor:pointer;">
+                    <i class="fas fa-upload"></i> 上传个人照片
+                </label>
+                <input id="photo-upload-${mod.id}" type="file" accept="image/*" onchange="uploadPhoto('${mod.id}', this)" style="display:none;">
+                ${mod.data.photo ? `<button class="btn btn-danger" onclick="removePhoto('${mod.id}')">${t('btn_remove_photo')}</button>` : ''}
+            </div>
+        </div>
         <div class="control-group"><label>${t('l_name')}</label><input type="text" value="${mod.data.name}" oninput="updateBasicData('${mod.id}', 'name', this.value)"></div>`;
         
         if (mod.data.infoItems && mod.data.infoItems.length > 0) {
