@@ -5,11 +5,12 @@
     --primary-color: #6366f1; 
     --primary-hover: #4f46e5;
     --text-main: #1f2937;
-    --text-muted: #6b7280;
+    --text-muted: #9ca3af;
     
     --r-bg-color: #ffffff;
     --r-line-height: 1.4;
-    --r-page-margin: 14mm;
+    --r-margin-v: 10mm;
+    --r-margin-h: 14mm;
     --r-module-spacing: 15px; 
     
     --r-name-font: system-ui, sans-serif; --r-name-size: 26px; --r-name-weight: bold;
@@ -27,7 +28,6 @@ body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI"
 .logo-icon { background: var(--primary-color); color: white; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px;}
 .badge { background: #fef08a; color: #854d0e; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: bold; margin-left: 5px;}
 
-/* 🚀 增加了 disabled 样式 */
 .btn { padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; justify-content: center;}
 .btn:active:not(:disabled) { transform: scale(0.97); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -38,8 +38,12 @@ body { font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI"
 .btn-danger { background: #fee2e2; color: #ef4444; padding: 8px 16px; border-radius: 8px;}
 .btn-danger:hover:not(:disabled) { background: #fecaca; }
 
+.text-danger { color: #ef4444; transition: 0.2s; }
+.text-danger:hover { color: #b91c1c; transform: scale(1.1); }
+.text-muted { color: var(--text-muted); }
+
 .app-container { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
-.panel { background: var(--panel-bg); backdrop-filter: blur(16px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4); display: flex; flex-direction: column; overflow: hidden; }
+.panel { background: var(--panel-bg); backdrop-filter: blur(16px); border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.4); display: flex; flex-direction: column; overflow: hidden; }
 
 .sidebar { width: 340px; flex-shrink: 0; }
 .editor { width: 450px; flex-shrink: 0; }
@@ -89,8 +93,8 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; bo
 .num-display::-webkit-inner-spin-button, .num-display::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="range"] { flex: 1; min-width: 0; cursor: pointer; height: 6px; border-radius: 3px; accent-color: #475569; transition: all 0.2s; }
 
-input[type="text"], textarea { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-family: inherit; font-size: 14px; transition: all 0.2s; background: #f9fafb; }
-input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary-color); background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+input[type="text"], textarea, select { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-family: inherit; font-size: 14px; transition: all 0.2s; background: #f9fafb; }
+input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary-color); background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 textarea { height: 120px; resize: vertical; }
 
 .hint { font-size: 12px; color: #9ca3af; margin-bottom: 15px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;}
@@ -109,9 +113,9 @@ textarea { height: 120px; resize: vertical; }
 
 #editor-header { padding: 20px 20px 15px 20px; margin: 0; font-size: 18px; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.5);}
 #dynamic-editor-area { padding: 20px; overflow-y: auto; flex: 1; }
-.list-item-editor { background: white; border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);}
+.list-item-editor { background: white; border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.3s;}
+.list-item-editor.item-hidden { opacity: 0.5; background: #f9fafb; } 
 .list-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; font-size: 14px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;}
-.list-item-header .text-danger:hover { transform: scale(1.1); }
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 80px; font-size: 14px; }
 
 
@@ -126,11 +130,11 @@ textarea { height: 120px; resize: vertical; }
     background-color: var(--r-bg-color);
     width: 210mm;
     min-height: 297mm; 
-    padding: var(--r-page-margin);
+    padding: var(--r-margin-v) var(--r-margin-h);
     box-sizing: border-box;
     
     position: relative; 
-    box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
     border-radius: 6px; 
     margin-bottom: 40px;
     line-height: var(--r-line-height);
@@ -144,39 +148,56 @@ textarea { height: 120px; resize: vertical; }
 .visual-page-gap {
     position: absolute;
     left: -5px; right: -5px;
-    height: 30px; 
+    height: 12px; /* 极简缝隙 */
     background-color: #ebedee;
     border-top: 1px solid #d1d5db;
     border-bottom: 1px solid #d1d5db;
     transform: translateY(-50%); 
     z-index: 10;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+    pointer-events: none; 
+    opacity: 0.9;
 }
-
 .gap-badge { background: #d1d5db; color: #4b5563; font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: bold; letter-spacing: 1px;}
 .resume-paper.export-mode .visual-page-gap { display: none !important; }
 
+/* 插入 DOM 的隐形垫片，彻底干掉 CSS Margin Collapsing Bug */
+.pagination-spacer {
+    display: block;
+    width: 100%;
+    clear: both;
+}
+
 /* --- 模块基础样式 --- */
-.r-module { margin-bottom: var(--r-module-spacing); transition: margin-top 0.3s ease;} 
-.r-mod-title { font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px; transition: margin-top 0.3s ease;}
-.r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); transition: margin-top 0.3s ease;}
+.r-module { margin-bottom: var(--r-module-spacing); } 
+.r-mod-title { font-family: var(--r-title-font); font-size: var(--r-title-size); font-weight: var(--r-title-weight); color: #1f2937; border-bottom: 2px solid #1f2937; padding-bottom: 4px; margin-bottom: 12px;}
+.r-basic-info { margin-bottom: calc(var(--r-module-spacing) * 1.5); }
 .r-basic-name { font-family: var(--r-name-font); font-size: var(--r-name-size); font-weight: var(--r-name-weight); color: #111827; margin-bottom: 8px; letter-spacing: 2px;}
 .r-basic-details { font-size: 0.9em; color: #4b5563; }
+
+.r-basic-details i {
+    opacity: 0.75;           
+    width: 1.2em;            
+    text-align: center;
+    margin-right: 4px;
+}
+
 .r-basic-photo-wrap { width: 90px; height: 120px; flex-shrink: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .r-basic-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
-.r-list-item { margin-bottom: 12px; transition: margin-top 0.3s ease;} 
+.r-list-item { margin-bottom: 12px; } 
 .r-list-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
 .r-list-title { font-family: var(--r-sub-font); font-size: var(--r-sub-size); font-weight: var(--r-sub-weight); color: #1f2937; }
 .r-list-date { font-size: 0.9em; color: #4b5563; }
 .r-list-subtitle { margin-bottom: 4px; font-size: 0.95em; color: #374151; font-weight: bold;}
-.r-list-desc, .r-text-content { font-size: 1em; color: #4b5563;}
+
+/* 两端对齐，极简高端感 */
+.r-list-desc, .r-text-content { font-size: 1em; color: #4b5563; text-align: justify; }
 .r-list-desc ul, .r-text-content ul { padding-left: 20px; margin-top: 4px; }
 .r-list-desc li, .r-text-content li { margin-bottom: 2px; }
 
 .tpl-left .r-basic-info { text-align: left; }
-.tpl-left .r-basic-info.has-photo { display: flex; align-items: center; justify-content: space-between; }
+.tpl-left .r-basic-info.has-photo { display: flex; align-items: flex-start; justify-content: space-between; }
 .tpl-left .r-basic-text { order: 1; flex: 1; }
 .tpl-left .r-basic-photo-wrap { order: 2; margin-left: 20px; }
 .tpl-left .r-basic-details span { margin: 0 12px 0 0; display: inline-block; }
@@ -188,7 +209,7 @@ textarea { height: 120px; resize: vertical; }
 .tpl-center .r-basic-details span { margin: 0 8px; display: inline-block; }
 
 .tpl-right .r-basic-info { text-align: right; }
-.tpl-right .r-basic-info.has-photo { display: flex; align-items: center; justify-content: space-between; }
+.tpl-right .r-basic-info.has-photo { display: flex; align-items: flex-start; justify-content: space-between; }
 .tpl-right .r-basic-text { order: 2; flex: 1; }
 .tpl-right .r-basic-photo-wrap { order: 1; margin-right: 20px; }
 .tpl-right .r-basic-details span { margin: 0 0 0 12px; display: inline-block; }

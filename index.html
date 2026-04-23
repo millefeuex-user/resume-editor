@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泛用型简历在线生成器 - 青春版 v1.5</title>
+    <title>Simple_Resume - 在线简历生成器 v1.13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,7 +12,7 @@
         <div class="nav-left" style="display: flex; align-items: center; gap: 20px;">
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-magic"></i></div>
-                <span data-i18n="app_title">魔方简历</span> <span class="badge" data-i18n="app_badge">青春版</span>
+                <span data-i18n="app_title">Simple_Resume</span> <span class="badge" data-i18n="app_badge">青春版</span>
             </div>
             
             <div class="history-actions" style="display: flex; gap: 8px; border-left: 1px solid #e5e7eb; padding-left: 20px;">
@@ -146,10 +146,22 @@
                 </div>
 
                 <div class="control-group">
-                    <label data-i18n="page_margin">页面边距 (mm)</label>
+                    <label data-i18n="margin_v">上下页边距 (mm)</label>
                     <div class="stepper-slider-group">
-                        <input type="range" id="slider-page-margin" min="10" max="40" step="1">
-                        <div class="stepper-wrap" id="stepper-page-margin">
+                        <input type="range" id="slider-margin-v" min="5" max="40" step="1">
+                        <div class="stepper-wrap" id="stepper-margin-v">
+                            <button class="step-btn decrease">-</button>
+                            <input type="number" step="1" class="num-display">
+                            <button class="step-btn increase">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label data-i18n="margin_h">左右页边距 (mm)</label>
+                    <div class="stepper-slider-group">
+                        <input type="range" id="slider-margin-h" min="5" max="40" step="1">
+                        <div class="stepper-wrap" id="stepper-margin-h">
                             <button class="step-btn decrease">-</button>
                             <input type="number" step="1" class="num-display">
                             <button class="step-btn increase">+</button>
@@ -212,12 +224,12 @@
             <div class="modal-body">
                 <div class="modal-warning">
                     <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                    <p data-i18n="modal_warning_text" style="color: #065f46;">已开启智能防割裂引擎，文字已被安全推至次页。如果感觉留白太多，请点击左侧“智能铺满”。</p>
+                    <p data-i18n="modal_warning_text" style="color: #065f46;">已开启超精细行级物理分页引擎，文字边界已被绝对保护。如果觉得最后一页太空，可以点击左侧的“智能一键铺满”。</p>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeExportModal()" data-i18n="btn_cancel">再调调</button>
-                <button class="btn btn-primary" id="btn-export-pdf"><i class="fas fa-file-pdf"></i> <span data-i18n="btn_confirm_export">确认导出</span></button>
+                <button class="btn btn-primary" id="btn-export-pdf"><i class="fas fa-file-pdf"></i> <span data-i18n="btn_confirm_export">确认无误并导出</span></button>
             </div>
         </div>
     </div>
