@@ -206,8 +206,7 @@
         <div class="panel preview-container">
             <div class="preview-scroll-area">
                 <div class="resume-viewport">
-                    <div id="resume-paper" class="resume-paper tpl-left">
-                        </div>
+                    <div id="resume-paper" class="resume-paper tpl-left"></div>
                 </div>
             </div>
         </div>
@@ -227,8 +226,16 @@
                 
                 <div class="modal-preview-panel preview-scroll-area">
                     <div class="resume-viewport">
-                        <div id="modal-resume-paper" class="resume-paper tpl-left"></div>
+                        <div id="modal-resume-paper" class="resume-paper tpl-left" style="transform-origin: top center; transition: transform 0.2s ease;"></div>
                     </div>
+                </div>
+
+                <div class="zoom-toolbar">
+                    <button class="btn btn-outline" onclick="updateExportZoom(-0.1)" title="缩小"><i class="fas fa-search-minus"></i></button>
+                    <span id="zoom-val" style="min-width: 50px; text-align: center; font-weight: bold; color: var(--primary-color);">100%</span>
+                    <button class="btn btn-outline" onclick="updateExportZoom(0.1)" title="放大"><i class="fas fa-search-plus"></i></button>
+                    <div style="width: 1px; height: 20px; background: #e5e7eb; margin: 0 5px;"></div>
+                    <button class="btn btn-outline" onclick="resetExportZoom()" title="重置比例 1:1"><i class="fas fa-compress-arrows-alt"></i></button>
                 </div>
             </div>
 

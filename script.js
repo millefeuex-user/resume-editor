@@ -40,6 +40,9 @@ let state = {
 
 const LOCAL_STORAGE_KEY = 'simple_resume_state_v1_16';
 
+// 控制导出弹窗缩放比例的变量
+let currentExportZoom = 1;
+
 // ==========================================
 // 历史记录引擎
 // ==========================================
@@ -201,7 +204,7 @@ function renderPreview(enablePagination = true) {
 function applySmartPagination(paperTarget) {
     if (!paperTarget) return;
     
-    // 🚀 核心优化：获取绝对精准的高度，消除缩放造成的换算误差
+    // 获取绝对精准的高度，保证底层换算误差最小化（恢复你的稳定版逻辑）
     const a4PxHeight = document.getElementById('a4-measure').getBoundingClientRect().height;
     
     paperTarget.querySelectorAll('.visual-page-gap, .pagination-spacer').forEach(el => el.remove());
@@ -259,13 +262,13 @@ function applySmartPagination(paperTarget) {
     const totalHeight = paperTarget.scrollHeight; 
     const totalPages = Math.ceil(totalHeight / a4PxHeight);
     
-    paperTarget.style.height = `${totalPages * 297}mm`; 
+    paperTarget.style.height = `calc(${totalPages} * 297mm)`; 
     
     for (let i = 1; i < totalPages; i++) {
         const gap = document.createElement('div'); 
         gap.className = 'visual-page-gap'; 
         gap.style.top = `calc(${i} * 297mm)`; 
-        gap.innerHTML = `<span class="gap-badge">Page ${i} - ${i+1}</span>`; 
+        gap.innerHTML = `<div class="divider-line"></div><span class="gap-badge">Page ${i} - ${i+1}</span>`; 
         paperTarget.appendChild(gap);
     }
 }
@@ -313,6 +316,25 @@ function bindSmartFitEvent() {
     });
 }
 
+// 供导出预览模态框使用的独立缩放功能
+window.updateExportZoom = function(delta) {
+    currentExportZoom += delta;
+    if(currentExportZoom < 0.4) currentExportZoom = 0.4;
+    if(currentExportZoom > 2.5) currentExportZoom = 2.5; 
+    if(els.modalPaper) {
+        els.modalPaper.style.transform = `scale(${currentExportZoom})`;
+        document.getElementById('zoom-val').textContent = Math.round(currentExportZoom * 100) + '%';
+    }
+};
+
+window.resetExportZoom = function() {
+    currentExportZoom = 1;
+    if(els.modalPaper) {
+        els.modalPaper.style.transform = `scale(1)`;
+        document.getElementById('zoom-val').textContent = '100%';
+    }
+};
+
 window.closeExportModal = function() { 
     document.querySelector('.sidebar').insertBefore(document.getElementById('tab-layout'), document.querySelector('#tab-modules'));
     els.exportModal.classList.remove('active'); 
@@ -328,13 +350,22 @@ function bindExportEvents() {
     
     els.btnConfirmExport.addEventListener('click', () => {
         const targetPaper = els.modalPaper;
+        
+        // 关键防护：导出时必须恢复原始缩放，否则导出的 PDF 是缩小的状态
+        const tempZoom = currentExportZoom;
+        resetExportZoom();
+
         targetPaper.classList.add('export-mode');
         const opt = { margin: 0, filename: 'Simple_Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
         document.body.style.overflow = 'visible'; 
+        
         html2pdf().set(opt).from(targetPaper).save().then(() => { 
             document.body.style.overflow = 'hidden'; 
             targetPaper.classList.remove('export-mode'); 
             closeExportModal(); 
+            // 导出后恢复历史缩放，保证流畅体验
+            currentExportZoom = tempZoom;
+            updateExportZoom(0);
         });
     });
 }
@@ -400,7 +431,6 @@ function renderEditor() {
     els.editorHeader.textContent = `${t('mod_edit')} - ${mod.title}`; let html = '';
     if (mod.type !== 'basic') html += `<div class="control-group"><label>${t('l_mod_title')}</label><input type="text" value="${mod.title}" oninput="updateModuleTitle('${mod.id}', this.value)"></div><div class="divider"></div>`;
     
-    // 🚀 核心优化：高颜值现代化图片上传控件
     if (mod.type === 'basic') {
         html += `
         <div class="control-group" style="background:#f9fafb; padding:15px; border-radius:12px; border:1px solid #d1d5db">
