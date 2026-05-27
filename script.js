@@ -39,9 +39,16 @@ let state = {
 };
 
 const LOCAL_STORAGE_KEY = 'simple_resume_state_v1_16';
+const AI_API_BASE_URL = (() => {
+    const isLocalPage = window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    return isLocalPage ? 'http://localhost:3001' : '';
+})();
+const AI_REWRITE_ALL_VALUE = '__all_resume_text__';
+const AI_REWRITE_MODULE_PREFIX = '__module__:';
 
 // 控制导出弹窗缩放比例的变量
 let currentExportZoom = 1;
+let aiRewriteDraft = null;
 
 // ==========================================
 // 历史记录引擎
@@ -89,11 +96,11 @@ function loadStateFromLocal() {
 // ==========================================
 const i18n = {
     zh: {
-        app_title: "Simple_Resume", export_pdf: "导出高清 PDF",
+        app_title: "Simple_Resume", export_pdf: "导出高清 PDF", ai_assistant: "AI 助手",
         tab_modules: "模块管理", tab_layout: "排版设置", drag_hint: "拖拽左侧图标排序，点击眼睛隐藏。", smart_fit: "智能一键铺满纸张", add_list: "新增经历模块", add_text: "新增文本模块", tpl_select: "排版风格", tpl_left: "左对齐", tpl_center: "居中对齐", tpl_right: "右对齐", bg_color: "简历背景颜色", font_hierarchy: "字体排版层级", font_name: "大标题", font_title: "一级标题", font_sub: "二级标题", font_text: "全局正文", font_sans: "默认黑体", font_serif: "经典宋体", font_kai: "优雅楷体", line_height: "全局行高", margin_v: "上下页边距 (mm)", margin_h: "左右页边距 (mm)", mod_spacing: "模块间距 (px)", mod_edit: "模块编辑", select_mod_hint: "请在左侧选择一个模块进行编辑", def_basic: "基本信息", def_edu: "教育经历", def_exp: "工作经历", def_skill: "专业技能", def_new_list: "新经历模块", def_new_text: "新文本模块", def_title: "主标题", def_sub: "副标题", def_date: "时间", def_desc: "描述...", btn_add: "添加经历项", alert_min: "至少保留一项！", confirm_del: "确定删除该项？", confirm_del_mod: "确定要删除这个模块吗？", l_mod_title: "模块显示标题", l_photo: "个人照片", l_name: "姓名", l_intent: "求职意向/个人总结", l_text_content: "文本内容 (支持回车换行或 HTML 标签)", l_main_title: "主标题 (公司/学校)", l_sub_title: "副标题 (职位/专业)", l_time: "时间区间", l_detail: "详细描述 (支持回车换行或 HTML)", btn_remove_photo: "移除照片", modal_export_title: "最终排版与预览", btn_cancel: "取消返回", btn_confirm_export: "确认无误并导出", add_info_item: "添加自定义信息"
     },
     en: {
-        app_title: "Simple_Resume", export_pdf: "Export HD PDF",
+        app_title: "Simple_Resume", export_pdf: "Export HD PDF", ai_assistant: "AI Assistant",
         tab_modules: "Modules", tab_layout: "Layout", drag_hint: "Drag icons to sort, click eye to hide.", smart_fit: "Smart Fit to Page", add_list: "Add Experience", add_text: "Add Text Block", tpl_select: "Layout Style", tpl_left: "Left Align", tpl_center: "Centered", tpl_right: "Right Align", bg_color: "Background Color", font_hierarchy: "Typography", font_name: "Name", font_title: "H1 Title", font_sub: "H2 Title", font_text: "Body Text", font_sans: "Sans-Serif", font_serif: "Serif", font_kai: "Script", line_height: "Line Height", margin_v: "V-Margin (mm)", margin_h: "H-Margin (mm)", mod_spacing: "Mod Spacing (px)", mod_edit: "Module Editor", select_mod_hint: "Please select a module on the left to edit", def_basic: "Basic Info", def_edu: "Education", def_exp: "Experience", def_skill: "Skills", def_new_list: "New Experience", def_new_text: "New Text Block", def_title: "Main Title", def_sub: "Subtitle", def_date: "Date", def_desc: "Description...", btn_add: "Add Item", alert_min: "Keep at least one item!", confirm_del: "Delete this item?", confirm_del_mod: "Delete this module?", l_mod_title: "Display Title", l_photo: "Photo", l_name: "Name", l_intent: "Intent/Summary", l_text_content: "Text Content", l_main_title: "Main Title", l_sub_title: "Subtitle", l_time: "Time Period", l_detail: "Details", btn_remove_photo: "Remove Photo", modal_export_title: "Final Export Preview", btn_cancel: "Cancel", btn_confirm_export: "Confirm & Export", add_info_item: "Add Custom Field"
     }
 };
@@ -134,11 +141,25 @@ const els = {
     editorArea: document.getElementById('dynamic-editor-area'), 
     editorHeader: document.getElementById('editor-header'), 
     paper: document.getElementById('resume-paper'),
-    modalPaper: document.getElementById('modal-resume-paper') 
+    modalPaper: document.getElementById('modal-resume-paper'),
+    btnAiAssistant: document.getElementById('btn-ai-assistant'),
+    aiBackdrop: document.getElementById('ai-backdrop'),
+    aiDrawer: document.getElementById('ai-drawer'),
+    btnAiClose: document.getElementById('btn-ai-close'),
+    aiChatMessages: document.getElementById('ai-chat-messages'),
+    aiChatInput: document.getElementById('ai-chat-input'),
+    btnAiChatSend: document.getElementById('btn-ai-chat-send'),
+    aiRewriteTarget: document.getElementById('ai-rewrite-target'),
+    aiRewriteInstruction: document.getElementById('ai-rewrite-instruction'),
+    btnAiRewrite: document.getElementById('btn-ai-rewrite'),
+    aiRewriteStatus: document.getElementById('ai-rewrite-status'),
+    aiRewriteOriginal: document.getElementById('ai-rewrite-original'),
+    aiRewriteResult: document.getElementById('ai-rewrite-result'),
+    btnAiApplyRewrite: document.getElementById('btn-ai-apply-rewrite')
 };
 
 function init() {
-    loadStateFromLocal(); bindTabEvents(); bindTemplateEvents(); bindLangEvent(); initConfigPanel(); initFontControls(); initSortable(); bindExportEvents(); bindSmartFitEvent(); bindHistoryEvents(); 
+    loadStateFromLocal(); bindTabEvents(); bindTemplateEvents(); bindLangEvent(); initConfigPanel(); initFontControls(); initSortable(); bindExportEvents(); bindSmartFitEvent(); bindHistoryEvents(); bindAiEvents();
     if(!state.activeModuleId || !state.modules.find(m => m.id === state.activeModuleId)) state.activeModuleId = state.modules[0].id; 
     els.paper.className = `resume-paper ${state.template}`;
     if (els.modalPaper) els.modalPaper.className = `resume-paper ${state.template}`;
@@ -149,6 +170,392 @@ function init() {
 function bindHistoryEvents() {
     document.getElementById('btn-undo').addEventListener('click', undo); document.getElementById('btn-redo').addEventListener('click', redo);
     document.addEventListener('keydown', (e) => { if (e.ctrlKey || e.metaKey) { if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); } else if (e.key === 'y' || e.key === 'Y') { e.preventDefault(); redo(); } } });
+}
+
+function bindAiEvents() {
+    if (!els.aiDrawer) return;
+    els.btnAiAssistant.addEventListener('click', openAiDrawer);
+    els.btnAiClose.addEventListener('click', closeAiDrawer);
+    els.aiBackdrop.addEventListener('click', closeAiDrawer);
+    els.btnAiChatSend.addEventListener('click', sendAiChatMessage);
+    els.btnAiRewrite.addEventListener('click', requestAiRewrite);
+    els.btnAiApplyRewrite.addEventListener('click', applyAiRewrite);
+    els.aiRewriteTarget.addEventListener('change', () => {
+        aiRewriteDraft = null;
+        els.aiRewriteResult.textContent = '';
+        els.btnAiApplyRewrite.disabled = true;
+        setAiStatus('');
+        updateAiRewriteOriginal();
+    });
+}
+
+function openAiDrawer() {
+    els.aiDrawer.classList.add('open');
+    els.aiDrawer.setAttribute('aria-hidden', 'false');
+    els.aiBackdrop.classList.add('active');
+    renderAiRewriteTargets();
+}
+
+function closeAiDrawer() {
+    els.aiDrawer.classList.remove('open');
+    els.aiDrawer.setAttribute('aria-hidden', 'true');
+    els.aiBackdrop.classList.remove('active');
+}
+
+function setAiStatus(message, type = '') {
+    if (!els.aiRewriteStatus) return;
+    els.aiRewriteStatus.textContent = message;
+    els.aiRewriteStatus.className = `ai-status ${type}`.trim();
+}
+
+function appendAiMessage(role, text) {
+    const messageEl = document.createElement('div');
+    messageEl.className = `ai-message ${role}`;
+    messageEl.textContent = text;
+    els.aiChatMessages.appendChild(messageEl);
+    els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
+}
+
+function setAiButtonLoading(button, isLoading, loadingText, normalText) {
+    button.disabled = isLoading;
+    button.innerHTML = isLoading ? loadingText : normalText;
+}
+
+function getResumeForAI() {
+    return state.modules.map(mod => {
+        if (mod.type === 'basic') {
+            return {
+                id: mod.id,
+                type: mod.type,
+                visible: mod.visible,
+                title: mod.title,
+                data: {
+                    name: mod.data.name,
+                    intent: mod.data.intent,
+                    infoItems: mod.data.infoItems || []
+                }
+            };
+        }
+        if (mod.type === 'list') {
+            return {
+                id: mod.id,
+                type: mod.type,
+                visible: mod.visible,
+                title: mod.title,
+                items: (mod.items || []).map(item => ({
+                    id: item.id,
+                    visible: item.visible,
+                    title: item.title,
+                    subtitle: item.subtitle,
+                    date: item.date,
+                    desc: item.desc
+                }))
+            };
+        }
+        return {
+            id: mod.id,
+            type: mod.type,
+            visible: mod.visible,
+            title: mod.title,
+            content: mod.content
+        };
+    });
+}
+
+async function sendAiChatMessage() {
+    const message = els.aiChatInput.value.trim();
+    if (!message) return;
+
+    appendAiMessage('user', message);
+    els.aiChatInput.value = '';
+    setAiButtonLoading(els.btnAiChatSend, true, '<i class="fas fa-spinner fa-spin"></i> 思考中', '<i class="fas fa-paper-plane"></i> 发送');
+
+    try {
+        const response = await fetch(`${AI_API_BASE_URL}/api/ai/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                resume: getResumeForAI()
+            })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'AI 对话请求失败');
+        appendAiMessage('assistant', data.reply || '没有收到 AI 回复。');
+    } catch (error) {
+        appendAiMessage('assistant', `请求失败：${error.message}。请确认后端 npm run dev 正在运行。`);
+    } finally {
+        setAiButtonLoading(els.btnAiChatSend, false, '', '<i class="fas fa-paper-plane"></i> 发送');
+    }
+}
+
+function getAiRewriteTargets() {
+    const targets = [];
+
+    state.modules.forEach(mod => {
+        if (mod.type === 'basic') {
+            targets.push({
+                id: `${mod.id}:intent`,
+                moduleId: mod.id,
+                moduleTitle: mod.title,
+                label: `${mod.title} - 求职意向/个人总结`,
+                text: mod.data.intent || '',
+                apply: value => { mod.data.intent = value; }
+            });
+            return;
+        }
+
+        if (mod.type === 'text') {
+            targets.push({
+                id: `${mod.id}:content`,
+                moduleId: mod.id,
+                moduleTitle: mod.title,
+                label: `${mod.title} - 文本内容`,
+                text: mod.content || '',
+                apply: value => { mod.content = value; }
+            });
+            return;
+        }
+
+        if (mod.type === 'list') {
+            (mod.items || []).forEach((item, index) => {
+                targets.push({
+                    id: `${mod.id}:${item.id}:desc`,
+                    moduleId: mod.id,
+                    moduleTitle: mod.title,
+                    label: `${mod.title} - ${item.title || getIndexedTitle(mod.title, index + 1)} - 详细描述`,
+                    text: item.desc || '',
+                    apply: value => { item.desc = value; }
+                });
+            });
+        }
+    });
+
+    return targets;
+}
+
+function getAiRewriteModuleOptions(targets) {
+    const moduleMap = new Map();
+    targets.forEach(target => {
+        if (!moduleMap.has(target.moduleId)) {
+            moduleMap.set(target.moduleId, {
+                id: target.moduleId,
+                title: target.moduleTitle,
+                count: 0
+            });
+        }
+        moduleMap.get(target.moduleId).count += 1;
+    });
+    return Array.from(moduleMap.values());
+}
+
+function getSelectedAiRewriteTargets() {
+    const targetId = els.aiRewriteTarget?.value;
+    const targets = getAiRewriteTargets();
+    if (targetId === AI_REWRITE_ALL_VALUE) {
+        return targets.filter(target => target.text.trim());
+    }
+    if (targetId?.startsWith(AI_REWRITE_MODULE_PREFIX)) {
+        const moduleId = targetId.slice(AI_REWRITE_MODULE_PREFIX.length);
+        return targets.filter(target => target.moduleId === moduleId && target.text.trim());
+    }
+    const target = targets.find(item => item.id === targetId);
+    return target ? [target] : [];
+}
+
+function renderAiRewriteTargets() {
+    if (!els.aiRewriteTarget) return;
+    const targets = getAiRewriteTargets();
+    const previousValue = els.aiRewriteTarget.value;
+    const moduleOptions = getAiRewriteModuleOptions(targets);
+    const nonEmptyTargetCount = targets.filter(target => target.text.trim()).length;
+
+    els.aiRewriteTarget.innerHTML = '';
+    if (!targets.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '当前模块没有可润色文本';
+        els.aiRewriteTarget.appendChild(option);
+        els.aiRewriteTarget.disabled = true;
+        els.btnAiRewrite.disabled = true;
+        els.aiRewriteOriginal.textContent = '';
+        els.aiRewriteResult.textContent = '';
+        els.btnAiApplyRewrite.disabled = true;
+        return;
+    }
+
+    const allOption = document.createElement('option');
+    allOption.value = AI_REWRITE_ALL_VALUE;
+    allOption.textContent = `整份简历 - 全部可润色文本（${nonEmptyTargetCount} 段）`;
+    els.aiRewriteTarget.appendChild(allOption);
+
+    const moduleGroup = document.createElement('optgroup');
+    moduleGroup.label = '按模块润色';
+    moduleOptions.forEach(moduleOption => {
+        const option = document.createElement('option');
+        option.value = `${AI_REWRITE_MODULE_PREFIX}${moduleOption.id}`;
+        option.textContent = `${moduleOption.title} - 整个模块（${moduleOption.count} 段）`;
+        moduleGroup.appendChild(option);
+    });
+    els.aiRewriteTarget.appendChild(moduleGroup);
+
+    const fieldGroup = document.createElement('optgroup');
+    fieldGroup.label = '按单段润色';
+    targets.forEach(target => {
+        const option = document.createElement('option');
+        option.value = target.id;
+        option.textContent = target.label;
+        fieldGroup.appendChild(option);
+    });
+    els.aiRewriteTarget.appendChild(fieldGroup);
+
+    const stillExists =
+        previousValue === AI_REWRITE_ALL_VALUE ||
+        (previousValue?.startsWith(AI_REWRITE_MODULE_PREFIX) && moduleOptions.some(option => `${AI_REWRITE_MODULE_PREFIX}${option.id}` === previousValue)) ||
+        targets.some(target => target.id === previousValue);
+    els.aiRewriteTarget.value = stillExists ? previousValue : AI_REWRITE_ALL_VALUE;
+    els.aiRewriteTarget.disabled = false;
+    els.btnAiRewrite.disabled = false;
+
+    if (aiRewriteDraft && aiRewriteDraft.scopeValue !== els.aiRewriteTarget.value) {
+        aiRewriteDraft = null;
+        els.aiRewriteResult.textContent = '';
+        els.btnAiApplyRewrite.disabled = true;
+    }
+    updateAiRewriteOriginal();
+}
+
+function updateAiRewriteOriginal() {
+    const targets = getSelectedAiRewriteTargets();
+    if (!targets.length) {
+        els.aiRewriteOriginal.textContent = '';
+        return;
+    }
+
+    if (targets.length > 1) {
+        els.aiRewriteOriginal.textContent = targets.map(target => `【${target.label}】\n${target.text}`).join('\n\n');
+        return;
+    }
+
+    els.aiRewriteOriginal.textContent = targets[0].text;
+}
+
+function buildAiRewriteInstruction(baseInstruction, target) {
+    const formatRules = [
+        '只优化文字表达，不修改任何排版格式。',
+        '不要返回 Markdown 标题、代码块、解释说明或额外前后缀。',
+        '不要改写模块标题、公司/学校名称、职位、时间字段。',
+        '不要新增不存在的经历、数据、证书或项目。',
+        '尽量保持原文的换行和段落结构；如果原文是普通换行文本，返回普通换行文本。',
+        '如果原文包含 HTML 标签，只能保留或微调原有语义标签，不能新增 style、class、颜色、字号、边距等样式属性。'
+    ];
+    return `${baseInstruction || '请优化这段简历内容，使表达更专业、清晰、有竞争力。'}\n\n格式限制：\n${formatRules.join('\n')}\n\n当前字段：${target.label}`;
+}
+
+function cleanAiRewriteText(text) {
+    return String(text || '')
+        .replace(/^```(?:html|text|markdown|md)?\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
+}
+
+async function requestAiRewrite() {
+    const targets = getSelectedAiRewriteTargets();
+    if (!targets.length) {
+        setAiStatus('请先选择一段可润色文本。', 'error');
+        return;
+    }
+
+    const baseInstruction = els.aiRewriteInstruction.value.trim();
+    const selectedValue = els.aiRewriteTarget.value;
+    const isAll = selectedValue === AI_REWRITE_ALL_VALUE;
+    const isModule = selectedValue?.startsWith(AI_REWRITE_MODULE_PREFIX);
+    setAiStatus(
+        isAll
+            ? `正在生成整份简历优化文本（0/${targets.length}）...`
+            : isModule
+                ? `正在生成当前模块优化文本（0/${targets.length}）...`
+                : '正在生成优化文本...'
+    );
+    els.aiRewriteResult.textContent = '';
+    els.btnAiApplyRewrite.disabled = true;
+    setAiButtonLoading(els.btnAiRewrite, true, '<i class="fas fa-spinner fa-spin"></i> 生成中', '<i class="fas fa-magic"></i> 生成优化文本');
+
+    try {
+        const results = [];
+        for (let i = 0; i < targets.length; i++) {
+            const target = targets[i];
+            if (isAll) setAiStatus(`正在生成整份简历优化文本（${i + 1}/${targets.length}）：${target.label}`);
+            else if (isModule) setAiStatus(`正在生成当前模块优化文本（${i + 1}/${targets.length}）：${target.label}`);
+
+            const response = await fetch(`${AI_API_BASE_URL}/api/ai/rewrite`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    instruction: buildAiRewriteInstruction(baseInstruction, target),
+                    text: target.text,
+                    context: {
+                        targetLabel: target.label,
+                        activeModuleId: state.activeModuleId,
+                        preserveFormat: true,
+                        resume: getResumeForAI()
+                    }
+                })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error || 'AI 润色请求失败');
+            results.push({
+                targetId: target.id,
+                label: target.label,
+                value: cleanAiRewriteText(data.optimizedText)
+            });
+        }
+
+        aiRewriteDraft = {
+            scopeValue: selectedValue,
+            mode: isAll ? 'all' : isModule ? 'module' : 'single',
+            items: results
+        };
+        els.aiRewriteResult.textContent = results.length > 1
+            ? results.map(item => `【${item.label}】\n${item.value}`).join('\n\n')
+            : (results[0]?.value || '');
+        els.btnAiApplyRewrite.disabled = !results.some(item => item.value.trim());
+        setAiStatus(results.length > 1 ? '批量优化文本已生成，确认后只会应用文字内容。' : '已生成，确认后可应用到简历。', 'success');
+    } catch (error) {
+        aiRewriteDraft = null;
+        setAiStatus(`请求失败：${error.message}。请确认后端 npm run dev 正在运行。`, 'error');
+    } finally {
+        setAiButtonLoading(els.btnAiRewrite, false, '', '<i class="fas fa-magic"></i> 生成优化文本');
+    }
+}
+
+function applyAiRewrite() {
+    if (!aiRewriteDraft || !aiRewriteDraft.items?.length) return;
+    const targets = getAiRewriteTargets();
+    let appliedCount = 0;
+
+    for (const draftItem of aiRewriteDraft.items) {
+        if (!draftItem.value.trim()) continue;
+        const target = targets.find(item => item.id === draftItem.targetId);
+        if (!target) continue;
+        target.apply(draftItem.value);
+        appliedCount++;
+    }
+
+    if (!appliedCount) {
+        setAiStatus('原文本位置已变化，请重新生成。', 'error');
+        return;
+    }
+
+    aiRewriteDraft = null;
+    renderEditor();
+    renderPreview();
+    saveStateToLocal();
+    pushHistory();
+    els.aiRewriteResult.textContent = '';
+    els.btnAiApplyRewrite.disabled = true;
+    setAiStatus(`已应用 ${appliedCount} 段文本到简历，排版格式未修改。`, 'success');
+    updateAiRewriteOriginal();
 }
 
 function syncConfigUI() {
@@ -427,7 +834,7 @@ window.deleteModule = function(id, event) { event.stopPropagation(); if (confirm
 
 function renderEditor() {
     const mod = state.modules.find(m => m.id === state.activeModuleId);
-    if (!mod) { els.editorArea.innerHTML = `<div class="empty-state"><i class="fas fa-ghost" style="font-size:30px; color:#cbd5e1; margin-bottom:10px; display:block;"></i>${t('select_mod_hint')}</div>`; return; }
+    if (!mod) { els.editorArea.innerHTML = `<div class="empty-state"><i class="fas fa-ghost" style="font-size:30px; color:#cbd5e1; margin-bottom:10px; display:block;"></i>${t('select_mod_hint')}</div>`; renderAiRewriteTargets(); return; }
     els.editorHeader.textContent = `${t('mod_edit')} - ${mod.title}`; let html = '';
     if (mod.type !== 'basic') html += `<div class="control-group"><label>${t('l_mod_title')}</label><input type="text" value="${mod.title}" oninput="updateModuleTitle('${mod.id}', this.value)"></div><div class="divider"></div>`;
     
@@ -493,12 +900,13 @@ function renderEditor() {
         html += `<button class="btn btn-outline" style="width:100%; border-style:dashed; margin-top: 5px;" onclick="addListItem('${mod.id}')"><i class="fas fa-plus"></i> ${t('btn_add')}</button>`;
     }
     els.editorArea.innerHTML = html;
+    renderAiRewriteTargets();
 }
 
-window.updateModuleTitle = function(id, val) { state.modules.find(m => m.id === id).title = val; renderModuleList(); renderPreview(); saveStateToLocal(); const mod = state.modules.find(m => m.id === id); if (mod && mod.type === 'list') { const headers = document.querySelectorAll('.list-item-header span'); headers.forEach((header, index) => { header.innerHTML = `<i class="fas fa-bookmark" style="color:#cbd5e1; margin-right:8px;"></i>${getIndexedTitle(mod.title, index + 1)}`; }); } }
-window.updateBasicData = function(id, key, val) { state.modules.find(m => m.id === id).data[key] = val; renderPreview(); saveStateToLocal();}
-window.updateTextContent = function(id, val) { state.modules.find(m => m.id === id).content = val; renderPreview(); saveStateToLocal();}
-window.updateListItem = function(modId, itemId, key, val) { state.modules.find(m => m.id === modId).items.find(i => i.id === itemId)[key] = val; renderPreview(); saveStateToLocal();}
+window.updateModuleTitle = function(id, val) { state.modules.find(m => m.id === id).title = val; renderModuleList(); renderPreview(); renderAiRewriteTargets(); saveStateToLocal(); const mod = state.modules.find(m => m.id === id); if (mod && mod.type === 'list') { const headers = document.querySelectorAll('.list-item-header span'); headers.forEach((header, index) => { header.innerHTML = `<i class="fas fa-bookmark" style="color:#cbd5e1; margin-right:8px;"></i>${getIndexedTitle(mod.title, index + 1)}`; }); } }
+window.updateBasicData = function(id, key, val) { state.modules.find(m => m.id === id).data[key] = val; renderPreview(); updateAiRewriteOriginal(); saveStateToLocal();}
+window.updateTextContent = function(id, val) { state.modules.find(m => m.id === id).content = val; renderPreview(); updateAiRewriteOriginal(); saveStateToLocal();}
+window.updateListItem = function(modId, itemId, key, val) { state.modules.find(m => m.id === modId).items.find(i => i.id === itemId)[key] = val; renderPreview(); updateAiRewriteOriginal(); saveStateToLocal();}
 window.uploadPhoto = function(modId, inputEl) { const file = inputEl.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { state.modules.find(m => m.id === modId).data.photo = e.target.result; renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}; reader.readAsDataURL(file); } }
 window.removePhoto = function(modId) { state.modules.find(m => m.id === modId).data.photo = ''; renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}
 window.addListItem = function(modId) { state.modules.find(m => m.id === modId).items.push({ id: generateId(), visible: true, title: t('def_title'), subtitle: '', date: '', desc: '' }); renderEditor(); renderPreview(); saveStateToLocal(); pushHistory();}

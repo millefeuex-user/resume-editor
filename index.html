@@ -22,6 +22,9 @@
         </div>
 
         <div class="actions">
+            <button id="btn-ai-assistant" class="btn btn-outline" style="margin-right: 12px;">
+                <i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="ai_assistant">AI 助手</span>
+            </button>
             <button id="btn-toggle-lang" class="btn btn-outline" style="margin-right: 15px;">
                 <i class="fas fa-language"></i> <span id="lang-text">EN</span>
             </button>
@@ -213,6 +216,68 @@
     </div>
 
     <div id="a4-measure" style="width: 210mm; height: 297mm; position: absolute; visibility: hidden; z-index: -999;"></div>
+
+    <div id="ai-backdrop" class="ai-backdrop"></div>
+    <aside id="ai-drawer" class="ai-drawer" aria-hidden="true">
+        <div class="ai-drawer-header">
+            <div>
+                <div class="ai-kicker">DeepSeek</div>
+                <h3>AI 简历助手</h3>
+            </div>
+            <button id="btn-ai-close" class="btn-close" title="关闭 AI 助手"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="ai-drawer-body">
+            <section class="ai-section">
+                <div class="ai-section-title">
+                    <i class="fas fa-comments"></i>
+                    <span>简历对话</span>
+                </div>
+                <div id="ai-chat-messages" class="ai-chat-messages">
+                    <div class="ai-message assistant">可以问我这份简历的问题，也可以让我给出优化建议。</div>
+                </div>
+                <textarea id="ai-chat-input" class="ai-input" placeholder="例如：这份简历有哪些问题？"></textarea>
+                <button id="btn-ai-chat-send" class="btn btn-primary ai-full-btn">
+                    <i class="fas fa-paper-plane"></i> 发送
+                </button>
+            </section>
+
+            <div class="ai-divider"></div>
+
+            <section class="ai-section">
+                <div class="ai-section-title">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>文本润色</span>
+                </div>
+                <label class="ai-label" for="ai-rewrite-target">选择润色范围</label>
+                <select id="ai-rewrite-target" class="ai-select"></select>
+
+                <label class="ai-label" for="ai-rewrite-instruction">优化要求</label>
+                <textarea id="ai-rewrite-instruction" class="ai-input" placeholder="例如：改得更适合 AI 产品经理岗位，突出结果和量化表达。不会修改字体、颜色、边距等排版格式。"></textarea>
+
+                <button id="btn-ai-rewrite" class="btn btn-primary ai-full-btn">
+                    <i class="fas fa-magic"></i> 生成优化文本
+                </button>
+
+                <div id="ai-rewrite-status" class="ai-status"></div>
+
+                <div class="ai-compare">
+                    <div>
+                        <div class="ai-compare-label">原文</div>
+                        <div id="ai-rewrite-original" class="ai-text-box"></div>
+                    </div>
+                    <div>
+                        <div class="ai-compare-label">AI 优化后</div>
+                        <div id="ai-rewrite-result" class="ai-text-box ai-result-box"></div>
+                    </div>
+                </div>
+
+                <button id="btn-ai-apply-rewrite" class="btn btn-outline ai-full-btn" disabled>
+                    <i class="fas fa-check"></i> 应用到简历
+                </button>
+            </section>
+        </div>
+    </aside>
 
     <div id="export-modal" class="modal-overlay full-screen-modal">
         <div class="modal-content large-modal">
